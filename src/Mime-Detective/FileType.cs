@@ -4,7 +4,7 @@ using System.Runtime.InteropServices;
 namespace MimeDetective
 {
 	/// <summary>
-	/// Little data structure to hold information about file types.
+	/// Data Structure to hold information about file types.
 	/// Holds information about binary header at the start of the file
 	/// </summary>
 	public class FileType : IEquatable<FileType>
@@ -45,8 +45,8 @@ namespace MimeDetective
 
 			if (b is null)
 				return a.Equals(b);
-			else
-				return b.Equals(a);
+			
+			return b.Equals(a);
 		}
 
 		public static bool operator !=(FileType a, FileType b) => !(a == b);
@@ -56,19 +56,16 @@ namespace MimeDetective
 			if (other is null)
 				return false;
 
-			if(other is FileType type)
-			{
-				if (HeaderOffset == type.HeaderOffset
-					&& Extension.Equals(type.Extension)
-					&& Mime.Equals(type.Mime)
-					&& CompareHeaders(Header, type.Header))
+			if (other is FileType type
+				&& HeaderOffset == type.HeaderOffset
+				&& Extension.Equals(type.Extension)
+				&& Mime.Equals(type.Mime)
+				&& CompareHeaders(Header, type.Header))
 					return true;
-			}
 
 			return false;
 		}
 
-		//todo add tests for both
 		public bool Equals(FileType other)
 		{
 			if (other is null)

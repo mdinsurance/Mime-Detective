@@ -58,7 +58,7 @@ namespace Mime_Detective.Benchmarks
 
 		static byte[] bytes;
 
-		static FileInfo GoodFile, GoodXmlFile, GoodZipFile, BadFile;
+		static FileInfo GoodFile;//, GoodXmlFile, GoodZipFile, BadFile;
 
 		[GlobalSetup]
 		public void Setup()
@@ -69,7 +69,7 @@ namespace Mime_Detective.Benchmarks
 			//BadFile = new FileInfo(badFile);
 
 
-			FileType type = MimeTypes.Types[0];
+			//FileType type = MimeTypes.Types[0];
 			bytes = new byte[1000];
 			using (FileStream file = GoodFile.OpenRead())
 			{

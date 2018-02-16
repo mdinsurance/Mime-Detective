@@ -3,9 +3,6 @@ using System.Buffers;
 using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
-using System.Runtime.CompilerServices;
-using System.Threading.Tasks;
-using static MimeDetective.InputHelpers;
 
 namespace MimeDetective
 {
@@ -18,7 +15,14 @@ namespace MimeDetective
 	/// </summary>
 	public static class MimeTypes
 	{
-		// all the file types to be put into one list
+		// number of bytes we read from a file
+		public const ushort MaxHeaderSize = 560;  // some file formats have headers offset to 512 bytes
+
+		/// <summary>
+		/// toggle this setting when to false when you want the mostly likely match
+		/// otherwise the default is true, and it will return null if the count isn't an exact match
+		/// </summary>
+		public static bool ExactMatch { get; set; } = true;
 
 		#region Constants
 
@@ -47,7 +51,7 @@ namespace MimeDetective
 		public readonly static FileType PDF = new FileType(new byte?[] { 0x25, 0x50, 0x44, 0x46 }, "pdf", "application/pdf");
 
 		//todo place holder extension
-		public readonly static FileType MSDOC = new FileType(new byte?[] { 0xD0, 0xCF, 0x11, 0xE0, 0xA1, 0xB1, 0x1A, 0xE1 }, "msdoc", "application/octet-stream");
+		public readonly static FileType MS_OFFICE = new FileType(new byte?[] { 0xD0, 0xCF, 0x11, 0xE0, 0xA1, 0xB1, 0x1A, 0xE1 }, "doc,ppt,xls", "application/octet-stream");
 
 		//application/xml text/xml
 		public readonly static FileType XML = new FileType(new byte?[] { 0x72, 0x73, 0x69, 0x6F, 0x6E, 0x3D, 0x22, 0x31, 0x2E, 0x30, 0x22, 0x3F, 0x3E },
@@ -191,10 +195,7 @@ namespace MimeDetective
 		//EVTX	 	Windows Vista event log file
 		public readonly static FileType ELF = new FileType(new byte?[] { 0x45, 0x6C, 0x66, 0x46, 0x69, 0x6C, 0x65, 0x00 }, "elf", "text/plain");
 
-		// number of bytes we read from a file
-		public const ushort MaxHeaderSize = 560;  // some file formats have headers offset to 512 bytes
-
-		public static readonly FileType[] Types = new FileType[] { PDF, WORD, EXCEL, JPEG, ZIP, RAR, RTF, PNG, PPT, GIF, DLL_EXE, MSDOC,
+		public static readonly FileType[] Types = new FileType[] { PDF, WORD, EXCEL, JPEG, ZIP, RAR, RTF, PNG, PPT, GIF, DLL_EXE, MS_OFFICE,
 				BMP, DLL_EXE, ZIP_7z, ZIP_7z_2, GZ_TGZ, TAR_ZH, TAR_ZV, OGG, ICO, XML, DWG, LIB_COFF, PST, PSD, BZ2,
 				AES, SKR, SKR_2, PKR, EML_FROM, ELF, TXT_UTF8, TXT_UTF16_BE, TXT_UTF16_LE, TXT_UTF32_BE, TXT_UTF32_LE,
 				Mp3, Wav, Flac, MIDI,
@@ -249,12 +250,12 @@ namespace MimeDetective
 		//todo break apart and split zip file handling to an IAnalyzer interface stuff design here
 		internal static FileType GetFileType(in ReadResult readResult)
 		{
-			if (readResult.ReadLength == 0)
-				return null;
-
 			try
 			{
-				bool doesNotHaveValues = true;
+				if (readResult.ReadLength == 0)
+					return null;
+
+				bool doesNotHaveAnyValues = true;
 
 				// checking if it's binary (not really exact, but should do the job)
 				// shouldn't work with UTF-16 OR UTF-32 files
@@ -262,25 +263,34 @@ namespace MimeDetective
 				{
 					if (readResult.Array[i] != 0)
 					{
-						doesNotHaveValues = false;
+						doesNotHaveAnyValues = false;
 						break;
 					}
 				}
 
-				if (doesNotHaveValues)
+				if (doesNotHaveAnyValues)
 					return null;
 
 				uint highestMatchingCount = 0;
 				FileType highestMatchingType = null;
+				bool exactMatch = false;
 
 				// compare the file header to the stored file headers
 				foreach (FileType type in Types)
 				{
-					uint matchingCount = GetFileMatchingCount(in readResult, type);
+					//uint matchingCount = GetFileMatchingCount(in readResult, type);
+					uint matchingCount = 0;
+
+					for (int i = 0, iOffset = type.HeaderOffset; i < type.Header.Length && iOffset < readResult.ReadLength; i++, iOffset++)
+					{
+						if (type.Header[i] is null || type.Header[i].Value == readResult.Array[iOffset])
+							matchingCount++;
+					}
 
 					if (type.Header.Length == matchingCount)
 					{
 						highestMatchingType = type;
+						exactMatch = true;
 						break;
 					}
 					else if (matchingCount > highestMatchingCount)
@@ -290,7 +300,14 @@ namespace MimeDetective
 					}
 				}
 
-				if (ZIP.Equals(highestMatchingType))
+				if (highestMatchingType is null)
+					return null;
+
+				if (ExactMatch && !exactMatch)
+					return null;
+
+				//an identity check should be okay here, since values are not user defined
+				if (ZIP.GetHashCode() == highestMatchingType.GetHashCode())
 					return FindZipType(in readResult);
 
 				return highestMatchingType;
@@ -300,7 +317,6 @@ namespace MimeDetective
 				if (readResult.Source != null && readResult.ShouldDisposeStream)
 					readResult.Source.Dispose();
 
-				//this might be the perf issue
 				if (readResult.IsArrayRented)
 					ArrayPool<byte>.Shared.Return(readResult.Array);
 			}
@@ -308,13 +324,12 @@ namespace MimeDetective
 
 		private static FileType FindZipType(in ReadResult readResult)
 		{
-			//TODO this still needs disposed somehow
-			readResult.CreateMemoryStreamIfSourceIsNull();
+			Stream mStream = readResult.Source ?? new MemoryStream(readResult.Array, 0, readResult.ReadLength);
 
-			if (readResult.Source.Position > 0)
-				readResult.Source.Seek(0, SeekOrigin.Begin);
+			if (mStream.Position > 0)
+				mStream.Seek(0, SeekOrigin.Begin);
 
-			using (ZipArchive zipData = new ZipArchive(readResult.Source, ZipArchiveMode.Read, leaveOpen: true))
+			using (ZipArchive zipData = new ZipArchive(mStream, ZipArchiveMode.Read, leaveOpen: true))
 			{
 				//check for office xml formats
 				var officeXml = CheckForDocxAndXlsxStream(zipData);
@@ -329,6 +344,9 @@ namespace MimeDetective
 					return openOffice;
 			}
 
+			if (mStream is MemoryStream)
+				mStream.Dispose();
+
 			return ZIP;
 		}
 
@@ -337,15 +355,16 @@ namespace MimeDetective
 		/// </summary>
 		/// <param name="CSV">The CSV String with extensions</param>
 		/// <returns>List of FileTypes</returns>
-		public static List<FileType> GetFileTypesByExtensions(string CSV)
+		public static List<FileType> GetFileTypesByExtensions(string csv)
 		{
 			List<FileType> result = new List<FileType>();
 
 			foreach (FileType type in Types)
 			{
-				if (CSV.IndexOf(type.Extension,0,StringComparison.OrdinalIgnoreCase) > 0)
+				if (csv.IndexOf(type.Extension,0,StringComparison.OrdinalIgnoreCase) > 0)
 					result.Add(type);
 			}
+
 			return result;
 		}  
 
@@ -363,38 +382,6 @@ namespace MimeDetective
 
 			return null;
 		}
-
-		/*
-		private static FileType CheckForDocxAndXlsxStream(ZipArchive zipData)
-		{
-			if (zipData.Entries.Any(e => e.FullName.StartsWith("word/")))
-				return WORDX;
-			else if (zipData.Entries.Any(e => e.FullName.StartsWith("xl/")))
-				return EXCELX;
-			else if (zipData.Entries.Any(e => e.FullName.StartsWith("ppt/")))
-				return PPTX;
-			else
-				return null;
-		}
-		*/
-		/*
-		private static FileType CheckForDocxAndXlsx(FileType type, FileInfo fileInfo)
-		{
-			FileType result = null;
-
-			//check for docx and xlsx
-			using (var zipFile = ZipFile.OpenRead(fileInfo.FullName))
-			{
-				if (zipFile.Entries.Any(e => e.FullName.StartsWith("word/")))
-					result = WORDX;
-				else if (zipFile.Entries.Any(e => e.FullName.StartsWith("xl/")))
-					result = EXCELX;
-				else
-					result = CheckForOdtAndOds(result, zipFile);
-			}
-			return result;
-		}
-		*/
 
 		//check for open doc formats
 		private static FileType CheckForOdtAndOds(ZipArchive zipFile)
@@ -424,43 +411,6 @@ namespace MimeDetective
 				else
 					return null;
 			}
-		}
-
-		/*
-		private static int GetFileMatchingCountOld(byte[] fileHeader, FileType type)
-		{
-			int matchingCount = 0;
-
-			for (int i = 0; i < type.Header.Length; i++)
-			{
-				// if file offset is not set to zero, we need to take this into account when comparing.
-				// if byte in type.header is set to null, means this byte is variable, ignore it
-				if (type.Header[i] != null && type.Header[i] != fileHeader[i + type.HeaderOffset])
-				{
-					// if one of the bytes does not match, move on to the next type
-					matchingCount = 0;
-					break;
-				}
-				else
-				{
-					matchingCount++;
-				}
-			}
-
-			return matchingCount;
-		}*/
-
-		private static uint GetFileMatchingCount(in ReadResult readResult, FileType type)
-		{
-			uint matchingCount = 0;
-
-			for (int i = 0, iOffset = type.HeaderOffset; i < type.Header.Length && i < readResult.ReadLength && iOffset < readResult.ReadLength; i++, iOffset++)
-			{
-				if (type.Header[i] is null || type.Header[i] == readResult.Array[iOffset])
-					matchingCount++;
-			}
-
-			return matchingCount;
 		}
 	}
 }

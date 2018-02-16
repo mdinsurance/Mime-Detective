@@ -1,5 +1,4 @@
 ﻿using System;
-using static MimeDetective.InputHelpers;
 
 namespace MimeDetective
 {
@@ -16,7 +15,7 @@ namespace MimeDetective
 		public static FileType GetFileType(this byte[] bytes)
 		{
 			if (bytes is null)
-				throw new ArgumentNullException(nameof(bytes));
+				ThrowHelpers.ByteArrayCannotBeNull(bytes);
 
 			ReadResult readResult = new ReadResult(bytes, bytes.Length);
 

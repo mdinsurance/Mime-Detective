@@ -10,6 +10,7 @@
 	<GenerateAssemblyCompanyAttribute>false</GenerateAssemblyCompanyAttribute>
 	<GenerateAssemblyProductAttribute>false</GenerateAssemblyProductAttribute>
 	<OutputType>exe</OutputType>
+	<LangVersion>latest</LangVersion>
   </PropertyGroup>
 
   <ItemGroup>

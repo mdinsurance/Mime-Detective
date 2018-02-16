@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
-using static MimeDetective.InputHelpers;
 
 namespace MimeDetective
 {
@@ -19,11 +18,11 @@ namespace MimeDetective
 		public static FileType GetFileType(this FileInfo file)
 		{
 			if (file is null)
-				throw new ArgumentNullException(nameof(file));
+				ThrowHelpers.FileInfoCannotBeNull(file);
 
 			var stream = file.OpenRead();
 
-			ReadResult readResult = ReadFileHeader(stream, MimeTypes.MaxHeaderSize);
+			ReadResult readResult = ReadResult.ReadFileHeader(stream);
 
 			return MimeTypes.GetFileType(in readResult);
 		}
@@ -31,11 +30,11 @@ namespace MimeDetective
 		public static async Task<FileType> GetFileTypeAsync(this FileInfo file)
 		{
 			if (file is null)
-				throw new ArgumentNullException(nameof(file));
+				ThrowHelpers.FileInfoCannotBeNull(file);
 
 			var stream = file.OpenRead();
 
-			ReadResult readResult = await ReadFileHeaderAsync(stream, MimeTypes.MaxHeaderSize);
+			ReadResult readResult = await ReadResult.ReadFileHeaderAsync(stream);
 
 			return MimeTypes.GetFileType(in readResult);
 		}
@@ -88,7 +87,7 @@ namespace MimeDetective
 			FileType actualType = GetFileType(file);
 
 			//TODO Write a test to check if this null check is correct
-			if (actualType.Mime == null)
+			if (actualType.Mime is null)
 				return false;
 
 			return (actualType.Equals(type));
@@ -112,7 +111,7 @@ namespace MimeDetective
 		public static bool IsMsi(this FileInfo fileInfo)
 		{
 			// MSI has a generic DOCFILE header. Also it matches PPT files
-			return fileInfo.IsType(MimeTypes.PPT) || fileInfo.IsType(MimeTypes.MSDOC);
+			return fileInfo.IsType(MimeTypes.PPT) || fileInfo.IsType(MimeTypes.MS_OFFICE);
 		}
 	}
 }

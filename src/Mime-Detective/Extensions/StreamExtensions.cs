@@ -1,7 +1,6 @@
 ﻿using System;
 using System.IO;
 using System.Threading.Tasks;
-using static MimeDetective.InputHelpers;
 
 namespace MimeDetective.Extensions
 {
@@ -18,9 +17,9 @@ namespace MimeDetective.Extensions
 		public static FileType GetFileType(this Stream stream)
 		{
 			if (stream is null)
-				throw new ArgumentNullException("Stream cannot be null");
+				ThrowHelpers.StreamCannotBeNull(stream);
 
-			ReadResult readResult = ReadHeaderFromStream(stream, MimeTypes.MaxHeaderSize, shouldDisposeStream: false);
+			ReadResult readResult = ReadResult.ReadHeaderFromStream(stream, shouldDisposeStream: false);
 
 			return MimeTypes.GetFileType(in readResult);
 		}
@@ -36,9 +35,9 @@ namespace MimeDetective.Extensions
 		public static FileType GetFileType(this Stream stream, bool shouldDisposeStream = false)
 		{
 			if (stream is null)
-				throw new ArgumentNullException("Stream cannot be null");
+				ThrowHelpers.StreamCannotBeNull(stream);
 
-			ReadResult readResult = ReadHeaderFromStream(stream, MimeTypes.MaxHeaderSize, shouldDisposeStream);
+			ReadResult readResult = ReadResult.ReadHeaderFromStream(stream, shouldDisposeStream);
 
 			return MimeTypes.GetFileType(in readResult);
 		}
@@ -54,9 +53,9 @@ namespace MimeDetective.Extensions
 		public static async Task<FileType> GetFileTypeAsync(this Stream stream)
 		{
 			if (stream is null)
-				throw new ArgumentNullException("Stream cannot be null");
+				ThrowHelpers.StreamCannotBeNull(stream);
 
-			ReadResult readResult = await InputHelpers.ReadHeaderFromStreamAsync(stream, MimeTypes.MaxHeaderSize, shouldDisposeStream: false);
+			ReadResult readResult = await ReadResult.ReadHeaderFromStreamAsync(stream, shouldDisposeStream: false);
 
 			return MimeTypes.GetFileType(in readResult);
 		}
@@ -72,9 +71,9 @@ namespace MimeDetective.Extensions
 		public static async Task<FileType> GetFileTypeAsync(this Stream stream, bool shouldDisposeStream = false)
 		{
 			if (stream is null)
-				throw new ArgumentNullException("Stream cannot be null");
+				ThrowHelpers.StreamCannotBeNull(stream);
 
-			ReadResult readResult = await ReadHeaderFromStreamAsync(stream, MimeTypes.MaxHeaderSize, shouldDisposeStream);
+			ReadResult readResult = await ReadResult.ReadHeaderFromStreamAsync(stream, shouldDisposeStream);
 
 			return MimeTypes.GetFileType(in readResult);
 		}

@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-VisualStudioVersion = 15.0.26430.13
+VisualStudioVersion = 15.0.27130.2010
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{098944FB-C1C9-48BE-AA37-CD3C5C336A84}"
 	ProjectSection(SolutionItems) = preProject
@@ -22,7 +22,9 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{A50202E7-0
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Mime-Detective", "src\Mime-Detective\Mime-Detective.csproj", "{40608F32-BF6E-4DE4-85AE-EF71C69EF18D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mime-Detective.Benchmarks", "test\Mime-Detective.Benchmarks\Mime-Detective.Benchmarks.csproj", "{7F622459-3B42-4393-A08D-BEB47432628A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Mime-Detective.Benchmarks", "test\Mime-Detective.Benchmarks\Mime-Detective.Benchmarks.csproj", "{7F622459-3B42-4393-A08D-BEB47432628A}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mime-Detective.Trie", "Mime-Detective.Trie\Mime-Detective.Trie.csproj", "{C460369D-D98D-49A4-9DCA-E18A2D70C5AE}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -42,6 +44,10 @@ Global
 		{7F622459-3B42-4393-A08D-BEB47432628A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7F622459-3B42-4393-A08D-BEB47432628A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{7F622459-3B42-4393-A08D-BEB47432628A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C460369D-D98D-49A4-9DCA-E18A2D70C5AE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C460369D-D98D-49A4-9DCA-E18A2D70C5AE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C460369D-D98D-49A4-9DCA-E18A2D70C5AE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C460369D-D98D-49A4-9DCA-E18A2D70C5AE}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -50,5 +56,9 @@ Global
 		{CB3A9BEA-C247-4FEB-8670-98E3034FC214} = {A50202E7-0386-4EB3-B09C-00EFCAE360F7}
 		{40608F32-BF6E-4DE4-85AE-EF71C69EF18D} = {17C4E0DE-B863-4A81-B755-62E663D041F1}
 		{7F622459-3B42-4393-A08D-BEB47432628A} = {A50202E7-0386-4EB3-B09C-00EFCAE360F7}
+		{C460369D-D98D-49A4-9DCA-E18A2D70C5AE} = {17C4E0DE-B863-4A81-B755-62E663D041F1}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {D55424FE-E903-489F-8709-BC2A5802AB45}
 	EndGlobalSection
 EndGlobal
