@@ -5,23 +5,24 @@ using System.Threading.Tasks;
 using MimeDetective;
 using Xunit;
 using System.IO;
+using MimeDetective.Utilities;
 
 namespace MimeDetective.Tests.Text
 {
-	public class TextTests
-	{
-		public const string TextPath = "./Data/Text/";
+    public class TextTests
+    {
+        public const string TextPath = "./Data/Text/";
 
-		public const string TextFile = "test.txt";
+        public const string TextFile = "test.txt";
 
-		private readonly static string TxtMime = MimeTypes.TXT.Mime;
+        [Fact]
+        public async Task IsTxt()
+        {
+            var info = new FileInfo(TextPath + TextFile);
 
-		[Fact]
-		public void IsTxt()
-		{
-			var info = new FileInfo(TextPath + TextFile);
+            var fileType = await info.GetFileTypeAsync();
 
-			Assert.True(info.GetFileType().Mime == TxtMime);
-		}
-	}
+            Assert.Equal(fileType.Extension, MimeTypes.TXT.Extension);
+        }
+    }
 }

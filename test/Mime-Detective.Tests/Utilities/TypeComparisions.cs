@@ -6,21 +6,31 @@ using Xunit;
 
 namespace MimeDetective.Utilities
 {
-	public static class TypeComparisions
-	{
-		public static async Task AssertIsType(FileInfo info, FileType type)
-		{
-			Assert.Equal(await info.GetFileTypeAsync(), type);
+    public static class TypeComparisions
+    {
+        public static FileInfo GetFileInfo(string dataPath, string file)
+        {
+            return new FileInfo(Path.Combine(dataPath, file));
+        }
 
-			Assert.Equal(info.GetFileType(), type);
+        public static FileInfo GetFileInfo(string dataPath, string file, string ext)
+        {
+            return new FileInfo(Path.Combine(dataPath, file + ext));
+        }
 
-			Assert.True(info.IsType(type));
+        public static async Task AssertIsType(FileInfo info, FileType type)
+        {
+            Assert.Equal(type, await info.GetFileTypeAsync());
 
-			Assert.True(info.GetFileType().Equals(type));
+            Assert.Equal(info.GetFileType(), type);
 
-			Assert.True(info.GetFileType() == type);
+            Assert.True(info.IsType(type));
 
-			Assert.False(info.GetFileType() != type);
-		}
-	}
+            Assert.True(info.GetFileType().Equals(type));
+
+            Assert.True(info.GetFileType() == type);
+
+            Assert.False(info.GetFileType() != type);
+        }
+    }
 }

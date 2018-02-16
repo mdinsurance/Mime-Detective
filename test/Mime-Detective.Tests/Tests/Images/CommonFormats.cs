@@ -6,107 +6,87 @@ using Xunit;
 using System.IO;
 using MimeDetective;
 using MimeDetective.Extensions;
+using MimeDetective.Utilities;
 
 namespace MimeDetective.Tests.Images
 {
-	// This project can output the Class library as a NuGet Package.
-	// To enable this option, right-click on the project and select the Properties menu item. In the Build tab select "Produce outputs on build".
-	public class CommonFormats
-	{
-		public CommonFormats()
-		{
-		}
+    public class CommonFormats
+    {
+        public const string ImagePath = "./Data/Images/";
 
-		public const string ImagePath = "./Data/Images/";
+        [Fact]
+        public async Task IsJpeg()
+        {
+            var info = new FileInfo(ImagePath + "test.jpg");
 
-		private readonly string BmpMime = MimeTypes.BMP.Mime;
+            Assert.True(info.IsJpeg());
 
-		private readonly string IcoMime = MimeTypes.ICO.Mime;
+            //false assertions
+            Assert.False(info.IsGif());
 
-		[Fact]
-		public void IsJpeg()
-		{
-			var info = new FileInfo(ImagePath + "test.jpg");
+            Assert.False(info.IsPng());
 
-			Assert.True(info.IsJpeg());
+            await TypeComparisions.AssertIsType(info, MimeTypes.JPEG);
+        }
 
-			//false assertions
-			Assert.False(info.IsGif());
+        [Fact]
+        public async Task IsBitmap()
+        {
+            var info = new FileInfo(ImagePath + "test.bmp");
 
-			Assert.False(info.IsPng());
+            //false assertions
+            Assert.False(info.IsJpeg());
 
-			Assert.False(info.GetFileType().Mime == BmpMime);
+            Assert.False(info.IsGif());
 
-			Assert.False(info.GetFileType().Mime == IcoMime);
-		}
+            Assert.False(info.IsPng());
 
-		[Fact]
-		public void IsBitmap()
-		{
-			var info = new FileInfo(ImagePath + "test.bmp");
+            await TypeComparisions.AssertIsType(info, MimeTypes.BMP);
+        }
 
-			Assert.True(info.GetFileType().Mime == BmpMime);
+        [Fact]
+        public async Task IsPng()
+        {
+            var info = new FileInfo(ImagePath + "test.png");
 
-			//false assertions
-			Assert.False(info.IsJpeg());
+            Assert.True(info.IsPng());
 
-			Assert.False(info.IsGif());
+            //false assertions
+            Assert.False(info.IsGif());
 
-			Assert.False(info.IsPng());
+            Assert.False(info.IsJpeg());
 
-			Assert.False(info.GetFileType().Mime == IcoMime);
-		}
+            await TypeComparisions.AssertIsType(info, MimeTypes.PNG);
+        }
 
-		[Fact]
-		public void IsPng()
-		{
-			var info = new FileInfo(ImagePath + "test.png");
+        [Fact]
+        public async Task IsGif()
+        {
+            var info = new FileInfo(ImagePath + "test.gif");
 
-			Assert.True(info.IsPng());
+            Assert.True(info.IsGif());
 
-			//false assertions
-			Assert.False(info.IsGif());
+            //false assertions
+            Assert.False(info.IsPng());
 
-			Assert.False(info.IsJpeg());
+            Assert.False(info.IsJpeg());
 
-			Assert.False(info.GetFileType().Mime == BmpMime);
+            await TypeComparisions.AssertIsType(info, MimeTypes.GIF);
+        }
 
-			Assert.False(info.GetFileType().Mime == IcoMime);
-		}
+        [Fact]
+        public async Task IsIco()
+        {
+            var info = new FileInfo(ImagePath + "test.ico");
 
-		[Fact]
-		public void IsGif()
-		{
-			var info = new FileInfo(ImagePath + "test.gif");
+            //false assertions
+            Assert.False(info.IsPng());
 
-			Assert.True(info.IsGif());
+            Assert.False(info.IsGif());
 
-			//false assertions
-			Assert.False(info.IsPng());
+            Assert.False(info.IsJpeg());
 
-			Assert.False(info.IsJpeg());
-
-			Assert.False(info.GetFileType().Mime == BmpMime);
-
-			Assert.False(info.GetFileType().Mime == IcoMime);
-		}
-
-		[Fact]
-		public void IsIco()
-		{
-			var info = new FileInfo(ImagePath + "test.ico");
-
-			Assert.True(info.GetFileType().Mime == IcoMime);
-
-			//false assertions
-			Assert.False(info.IsPng());
-
-			Assert.False(info.IsGif());
-
-			Assert.False(info.IsJpeg());
-
-			Assert.False(info.GetFileType().Mime == BmpMime);
-		}
-
-	}
+            await TypeComparisions.AssertIsType(info, MimeTypes.ICO);
+        }
+    }
 }

@@ -1,26 +1,25 @@
 ﻿using System.IO;
 using System.Threading.Tasks;
 using Xunit;
+using static MimeDetective.Utilities.TypeComparisions;
 
 namespace MimeDetective.Tests.Tests.Documents
 {
-	public class PdfFormats
-	{
-		public const string DocsPath = "./Data/Documents/";
+    public class PdfFormats
+    {
+        public const string DocsPath = "./Data/Documents/";
 
-		[Theory]
-		[InlineData("MicrosoftPrintToPdf.pdf")]
-		[InlineData("GithubTestPdf2.pdf")]
-		[InlineData("PdfWord2016.pdf")]
-		public async Task FileInfoPDF(string testPdf)
-		{
-			var info = new FileInfo(Path.Combine(DocsPath, testPdf));
+        [Theory]
+        [InlineData("MicrosoftPrintToPdf")]
+        [InlineData("GithubTestPdf2")]
+        [InlineData("PdfWord2016")]
+        public async Task FileInfoPDF(string testPdf)
+        {
+            var info = GetFileInfo(DocsPath, testPdf, ".pdf");
 
-			var a = Directory.GetCurrentDirectory();
+            Assert.True(info.IsPdf());
 
-			var fileInfo = await info.GetFileTypeAsync();
-
-			Assert.Equal(fileInfo, MimeTypes.PDF);
-		}
-	}
+            await AssertIsType(info, MimeTypes.PDF);
+        }
+    }
 }

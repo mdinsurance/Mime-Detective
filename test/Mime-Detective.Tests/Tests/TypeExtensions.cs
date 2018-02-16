@@ -231,8 +231,19 @@ namespace MimeDetective.Tests
 			var emptyBtyeArray = new byte[0];
 
 			Assert.Null(emptyBtyeArray.GetFileType());
+		}
 
-			//Assert.ThrowsAny<Exception>(() => emptyBtyeArray.GetFileType());
+		[Theory]
+		[InlineData(new byte[] { 0 })]
+		[InlineData(new byte[] { 0, 0 })]
+		[InlineData(new byte[] { 0, 0, 0, 0 })]
+		[InlineData(new byte[] { 0, 0, 0, 0, 0, 0, 0, 0, 1 })]
+		[InlineData(new byte[] { 1, 0, 0, 0, 0, 0, 0, 0, 1 })]
+		public void NoMatchingFileDef(byte[] array)
+		{
+			var almostZerodResult = array.GetFileType();
+
+			Assert.Null(almostZerodResult);
 		}
 
 		[Theory]
