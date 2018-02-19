@@ -20,12 +20,6 @@ namespace Mime_Detective.Benchmarks
 		public MyConfig()
 		{
 			Add(Job.Default.With(Runtime.Clr)
-				.With(CsProjClassicNetToolchain.Net462)
-				.With(Jit.RyuJit)
-				.With(Platform.X64)
-				.WithId("Net462"));
-
-			Add(Job.Default.With(Runtime.Clr)
 				.With(CsProjClassicNetToolchain.Net47)
 				.With(Jit.RyuJit)
 				.With(Platform.X64)
@@ -59,6 +53,7 @@ namespace Mime_Detective.Benchmarks
 		static byte[] bytes;
 
 		static FileInfo GoodFile;//, GoodXmlFile, GoodZipFile, BadFile;
+        static readonly Trie trie = new Trie(MimeTypes.Types);
 
 		[GlobalSetup]
 		public void Setup()
@@ -102,6 +97,13 @@ namespace Mime_Detective.Benchmarks
 		{
 			return bytes.GetFileType();
 		}
+
+        [Benchmark]
+        public FileType TrieLookUp()
+        {
+            ReadResult result = new ReadResult(bytes, 1000);
+            return trie.Search(in result);
+        }
 
 		/*
 		//[Benchmark(OperationsPerInvoke = 1000)]

@@ -41,7 +41,7 @@ namespace MimeDetective
         /// </summary>
         /// <param name="file">The file to work with</param>
         /// <returns>Array of bytes</returns>
-        internal static ReadResult ReadFileHeader(FileStream fileStream)
+        public static ReadResult ReadFileHeader(FileStream fileStream)
         {
             byte[] header = ArrayPool<byte>.Shared.Rent(MimeTypes.MaxHeaderSize);
 
