@@ -63,8 +63,7 @@ namespace MimeDetective
             FileType match = null;
             int i = Offset;
 
-            if (!Children.TryGetValue(readResult.Array[i], out Node node))
-                if (!Children.TryGetValue(Trie.NullStandInValue, out node))
+            if (!Children.TryGetValue(readResult.Array[i], out Node node) && !Children.TryGetValue(Trie.NullStandInValue, out node))
                     return null;
 
             if (node.IsEndOfRecord)
@@ -76,8 +75,7 @@ namespace MimeDetective
             {
                 Node prevNode = node;
 
-                if(!prevNode.Children.TryGetValue(readResult.Array[i], out node))
-                    if (!prevNode.Children.TryGetValue(Trie.NullStandInValue, out node))
+                if(!prevNode.Children.TryGetValue(readResult.Array[i], out node) && !prevNode.Children.TryGetValue(Trie.NullStandInValue, out node))
                         break;
 
                 if (node.IsEndOfRecord)
