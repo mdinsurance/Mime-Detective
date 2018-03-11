@@ -1,14 +1,9 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-	<TargetFrameworks>netcoreapp2.0;netcoreapp1.1;net47;net462</TargetFrameworks>
+	<TargetFrameworks>netcoreapp2.1;netcoreapp2.0;netcoreapp1.1;net47</TargetFrameworks>
 	<AssemblyName>Mime-Detective.Benchmarks</AssemblyName>
 	<PackageId>Mime-Detective.Benchmarks</PackageId>
-	<GenerateRuntimeConfigurationFiles>true</GenerateRuntimeConfigurationFiles>
-	<RuntimeFrameworkVersion Condition=" '$(TargetFramework)' == 'netcoreapp2.0' ">2.0</RuntimeFrameworkVersion>
-	<GenerateAssemblyConfigurationAttribute>false</GenerateAssemblyConfigurationAttribute>
-	<GenerateAssemblyCompanyAttribute>false</GenerateAssemblyCompanyAttribute>
-	<GenerateAssemblyProductAttribute>false</GenerateAssemblyProductAttribute>
 	<OutputType>exe</OutputType>
 	<LangVersion>latest</LangVersion>
   </PropertyGroup>
@@ -16,7 +11,7 @@
   <ItemGroup>
 	<ProjectReference Include="..\..\src\Mime-Detective\Mime-Detective.csproj" />
 	<PackageReference Include="BenchmarkDotNet">
-	  <Version>0.10.11</Version>
+	  <Version>0.10.13</Version>
 	</PackageReference>
   </ItemGroup>
 

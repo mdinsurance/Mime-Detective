@@ -12,190 +12,116 @@ using BenchmarkDotNet.Environments;
 using BenchmarkDotNet.Toolchains.CsProj;
 using System.Linq;
 using System.Runtime.CompilerServices;
+using MimeDetective.Analyzers;
 
 namespace Mime_Detective.Benchmarks
 {
-	public class MyConfig : ManualConfig
-	{
-		public MyConfig()
-		{
-			Add(Job.Default.With(Runtime.Clr)
-				.With(CsProjClassicNetToolchain.Net47)
-				.With(Jit.RyuJit)
-				.With(Platform.X64)
-				.WithId("Net47"));
-
-			Add(Job.Default.With(Runtime.Core)
-				.With(CsProjCoreToolchain.NetCoreApp11)
-				.With(Platform.X64)
-				.With(Jit.RyuJit)
-				.WithId("NetCore1.1"));
-
-			Add(Job.Default.With(Runtime.Core)
-				.With(CsProjCoreToolchain.NetCoreApp20)
-				.With(Platform.X64)
-				.With(Jit.RyuJit)
-				.WithId("NetCore2.0"));
-		}
-	}
-
-	[Config(typeof(MyConfig)), MemoryDiagnoser]
-	public class TypeLookup
-	{
-		const string goodFile = "./data/images/test.jpg";
-
-		const string goodXmlFile = "./data/Documents/test.docx";
-
-		const string goodZipFile = "./data/images.zip";
-
-		const string badFile = "./data/empty.jpg";
-
-		static byte[] bytes;
-
-		static FileInfo GoodFile;//, GoodXmlFile, GoodZipFile, BadFile;
-        static readonly Trie trie = new Trie(MimeTypes.Types);
-
-		[GlobalSetup]
-		public void Setup()
-		{
-			GoodFile = new FileInfo(goodFile);
-			//GoodXmlFile = new FileInfo(goodXmlFile);
-			//GoodZipFile = new FileInfo(goodZipFile);
-			//BadFile = new FileInfo(badFile);
-
-
-			//FileType type = MimeTypes.Types[0];
-			bytes = new byte[1000];
-			using (FileStream file = GoodFile.OpenRead())
-			{
-				file.Read(bytes,0,1000);
-			}
-
-			GC.Collect();
-		}
-
-		//[Benchmark(OperationsPerInvoke = 1000)]
-		//public void GoodLookup() => DoNTimes(GoodFile);
-
-		//[Benchmark(OperationsPerInvoke = 1000)]
-		//public void BinaryLookup() => DoNTimesBinary(GoodFile);
-
-		//[Benchmark(OperationsPerInvoke = 1000)]
-		//public void BadLookup() => DoNTimes(BadFile);
-
-
-		//[Benchmark(OperationsPerInvoke = 1000)]
-		//public void DocxLookup() => DoNTimes(GoodXmlFile);
-
-		//[Benchmark(OperationsPerInvoke = 1000)]
-		//public void ZipLookup() => DoNTimes(GoodZipFile);
-
-		//[Benchmark(OperationsPerInvoke = 1000)]
-
-		[Benchmark]
-		public FileType ByteArrayLookupBinary()
-		{
-			return bytes.GetFileType();
-		}
-
-        [Benchmark]
-        public FileType TrieLookUp()
+    public class MyConfig : ManualConfig
+    {
+        public MyConfig()
         {
-            ReadResult result = new ReadResult(bytes, 1000);
-            return trie.Search(in result);
+            Add(Job.Default.With(Runtime.Clr)
+                .With(CsProjClassicNetToolchain.Net47)
+                .With(Jit.RyuJit)
+                .With(Platform.X64)
+                .WithId("Net47"));
+
+            Add(Job.Default.With(Runtime.Core)
+                .With(CsProjCoreToolchain.NetCoreApp11)
+                .With(Platform.X64)
+                .With(Jit.RyuJit)
+                .WithId("NetCore1.1"));
+
+            Add(Job.Default.With(Runtime.Core)
+                .With(CsProjCoreToolchain.NetCoreApp20)
+                .With(Platform.X64)
+                .With(Jit.RyuJit)
+                .WithId("NetCore2.0"));
+
+            Add(Job.Default.With(Runtime.Core)
+                .With(CsProjCoreToolchain.NetCoreApp21)
+                .With(Platform.X64)
+                .With(Jit.RyuJit)
+                .WithId("NetCore2.1"));
+        }
+    }
+
+    [Config(typeof(MyConfig)), MemoryDiagnoser]
+    public class TypeLookup
+    {
+        static readonly byte[][] files = new byte[][]
+        {
+            ReadFile(new FileInfo("./data/Images/test.jpg")),
+            ReadFile(new FileInfo("./data/Images/test.gif")),
+            ReadFile(new FileInfo("./data/Documents/DocWord2016.doc")),
+            ReadFile(new FileInfo("./data/Zip/Images.zip")),
+            ReadFile(new FileInfo("./data/Assemblies/NativeExe.exe")),
+            ReadFile(new FileInfo("./data/Audio/wavVLC.wav"))
+        };
+
+        const int OpsPerInvoke = 6;
+        static readonly LinearCountingAnalyzer linear = new LinearCountingAnalyzer(MimeTypes.Types);
+        static readonly DictionaryBasedTrie trie2 = new DictionaryBasedTrie(MimeTypes.Types);
+        static readonly ArrayBasedTrie trie5 = new ArrayBasedTrie(MimeTypes.Types);
+
+        static byte[] ReadFile(FileInfo info)
+        {
+            byte[] bytes = new byte[MimeTypes.MaxHeaderSize];
+            using (FileStream file = info.OpenRead())
+            {
+                file.Read(bytes, 0, MimeTypes.MaxHeaderSize);
+            }
+            return bytes;
         }
 
-		/*
-		//[Benchmark(OperationsPerInvoke = 1000)]
-		public void IsTextForLoopIter()
-		{
-			for (int i = 0; i < 1000; i++)
-			{
-				var type = IsTxtForLoop();
-			}
-		}
+        [Benchmark(OperationsPerInvoke = OpsPerInvoke, Baseline = true)]
+        public FileType LinearCountingAnalyzer()
+        {
+            FileType result = null;
+            foreach (var array in files)
+            {
+                using (ReadResult readResult = new ReadResult(array, MimeTypes.MaxHeaderSize))
+                {
+                    result = linear.Search(in readResult);
+                }
+            }
+            return result;
+        }
 
+        [Benchmark(OperationsPerInvoke = OpsPerInvoke)]
+        public FileType DictionaryBasedTrie()
+        {
+            FileType result = null;
+            foreach (var array in files)
+            {
+                using (ReadResult readResult = new ReadResult(array, MimeTypes.MaxHeaderSize))
+                {
+                    result = trie2.Search(in readResult);
+                }
+            }
+            return result;
+        }
 
-		public FileType IsTxtForLoop()
-		{
-			for (int i = 0; i < bytes.Length; i++)
-			{
-				if (bytes[i] != 0)
-					return null;
-				else if (i == bytes.Length - 1)
-					return MimeTypes.TXT;
-			}
+        [Benchmark(OperationsPerInvoke = OpsPerInvoke)]
+        public FileType ArrayBasedTrie()
+        {
+            FileType result = null;
+            foreach (var array in files)
+            {
+                using (ReadResult readResult = new ReadResult(array, MimeTypes.MaxHeaderSize))
+                {
+                    result = trie5.Search(in readResult);
+                }
+            }
+            return result;
+        }
+    }
 
-			return null;
-		}
-
-		//[Benchmark(OperationsPerInvoke = 1000)]
-		public void IsTextForeachLoopIter()
-		{
-			for (int i = 0; i < 1000; i++)
-			{
-				var type = IsTxtForeachLoop();
-			}
-		}
-
-		//[Benchmark(OperationsPerInvoke = 1000)]
-		public void IsTextWhileForeachLoopIter()
-		{
-			for (int i = 0; i < 1000; i++)
-			{
-				var type = IsTxtWhileForeachLoop();
-			}
-		}
-
-		public FileType IsTxtWhileForeachLoop()
-		{
-			var temp = bytes.AsEnumerable().GetEnumerator();
-
-			while(temp.MoveNext())
-			{
-				if (temp.Current != 0)
-					return null;
-			}
-
-			return MimeTypes.TXT;
-		}
-
-		public FileType IsTxtForeachLoop()
-		{
-			foreach(byte bYte in bytes)
-			{
-				if (bYte != 0)
-					return null;
-			}
-
-			return MimeTypes.TXT;
-		}
-
-		//[Benchmark(OperationsPerInvoke = 1000)]
-		public void IsTextAnyLinqIter()
-		{
-			for (int i = 0; i < 1000; i++)
-			{
-				var type = IsTextAnyLinq();
-			}
-		}
-
-
-		public FileType IsTextAnyLinq()
-		{
-			if (!bytes.Any(b => b == 0))
-				return MimeTypes.TXT;
-			else
-				return null;
-		}
-		*/
-	}
-
-	public class Program
-	{
-		public static void Main(string[] args)
-		{
-			var summary = BenchmarkRunner.Run<TypeLookup>(); 
-		}
-	}
+    public class Program
+    {
+        public static void Main(string[] args)
+        {
+            var summary = BenchmarkRunner.Run<TypeLookup>(); 
+        }
+    }
 }
