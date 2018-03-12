@@ -25,7 +25,7 @@ namespace MimeDetective.Analyzers
             else
                 mStream = readResult.Source;
 
-            if (mStream.Position > 0)
+            if (mStream.CanSeek && mStream.Position > 0)
                 mStream.Seek(0, SeekOrigin.Begin);
 
             using (ZipArchive zipData = new ZipArchive(mStream, ZipArchiveMode.Read, leaveOpen: true))

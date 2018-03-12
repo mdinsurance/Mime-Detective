@@ -108,7 +108,7 @@ namespace MimeDetective
             if (!stream.CanRead)
                 ThrowHelpers.CannotReadFromStream();
 
-            if (stream.Position > 0)
+            if (stream.CanSeek && stream.Position > 0)
                 stream.Seek(0, SeekOrigin.Begin);
 
             byte[] header = ArrayPool<byte>.Shared.Rent(MimeTypes.MaxHeaderSize);
@@ -133,7 +133,7 @@ namespace MimeDetective
             if (!stream.CanRead)
                 ThrowHelpers.CannotReadFromStream();
 
-            if (stream.Position > 0)
+            if (stream.CanSeek && stream.Position > 0)
                 stream.Seek(0, SeekOrigin.Begin);
 
             byte[] header = ArrayPool<byte>.Shared.Rent(MimeTypes.MaxHeaderSize);
@@ -145,11 +145,13 @@ namespace MimeDetective
 
         public void Dispose()
         {
-            if (ShouldResetStreamPosition)
-                Source?.Seek(0, SeekOrigin.Begin);
+            bool sourceIsNotNull = (object)Source != null;
 
-            if (ShouldDisposeStream)
-                Source?.Dispose();
+            if (sourceIsNotNull && ShouldResetStreamPosition && Source.CanSeek)
+                Source.Seek(0, SeekOrigin.Begin);
+
+            if (sourceIsNotNull && ShouldDisposeStream)
+                Source.Dispose();
 
             if (IsArrayRented)
                 ArrayPool<byte>.Shared.Return(Array);
