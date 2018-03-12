@@ -22,7 +22,7 @@ namespace MimeDetective.Utilities
         {
             Assert.Equal(type, await info.GetFileTypeAsync());
 
-            Assert.Equal(info.GetFileType(), type);
+            Assert.Equal(type, info.GetFileType());
 
             Assert.True(info.IsType(type));
 

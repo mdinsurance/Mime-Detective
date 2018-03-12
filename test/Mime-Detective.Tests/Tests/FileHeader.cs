@@ -5,6 +5,7 @@ using System.Linq;
 using Xunit;
 using System.Reflection;
 using static MimeDetective.Tests.ReflectionHelpers;
+using MimeDetective.Analyzers;
 
 namespace MimeDetective.Tests
 {
@@ -77,10 +78,10 @@ namespace MimeDetective.Tests
 		}
 
 		[Fact]
-		public void VerifyAllNonZipFileTypesArePresentInTypesArray()
+		public void VerifyAllNonExcludedTypesArePresentInTypesArray()
 		{
 			var allTypeValues = GetAllTypeValues();
-			var zipFileTypesFilteredOut = allTypeValues.Except(MimeTypes.XmlTypes).Except(new FileType[] { MimeTypes.TXT });
+			var zipFileTypesFilteredOut = allTypeValues.Except(MsOfficeAnalyzer.MsDocTypes).Except(MimeTypes.XmlTypes).Except(new FileType[] { MimeTypes.TXT });
 
 			Assert.NotNull(zipFileTypesFilteredOut);
 			Assert.NotEmpty(zipFileTypesFilteredOut);

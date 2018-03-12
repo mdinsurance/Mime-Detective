@@ -13,10 +13,42 @@ namespace MimeDetective.Tests.Documents
     {
         public const string DocsPath = "./Data/Documents/";
 
+        //examples of doc which don't match specific sub header but match ms doc header
+        [Theory]
+        [InlineData("OpenOfficePpt.ppt")]
+        [InlineData("OpenOfficeWord6.0Doc.doc")]
+        [InlineData("OpenOfficeWord95Doc.doc")]
+        [InlineData("OpenOfficeWordDoc.doc")]
+        [InlineData("OpenOfficeExcel.xls")]
+        [InlineData("OpenOfficeExcel50.xls")]
+        [InlineData("OpenOfficeExcel95.xls")]
+        [InlineData("XlsExcel2007.xls")]
+        public async Task IsMSOLEDocType(string fileName)
+        {
+            var info = GetFileInfo(DocsPath, fileName);
+
+            await AssertIsType(info, MimeTypes.MS_OFFICE);
+        }
+
+        [Theory]
+        [InlineData("DocWord2016.doc")]
+        [InlineData("DocWord97.doc")]
+        [InlineData("OpenOfficeWord6.0Doc.doc")]
+        [InlineData("OpenOfficeWord95Doc.doc")]
+        [InlineData("OpenOfficeWordDoc.doc")]
+        [InlineData("DocxWord2016.docx")]
+        [InlineData("StrictOpenXMLWord2016.docx")]
+        public void IsDoc(string filePath)
+        {
+            var info = GetFileInfo(DocsPath, filePath);
+
+            Assert.True(info.IsWord());
+        }
+
         [Theory]
         [InlineData("DocWord2016")]
         [InlineData("DocWord97")]
-        public async Task IsDoc(string filePath)
+        public async Task IsDoc2(string filePath)
         {
             var info = GetFileInfo(DocsPath, filePath, ".doc");
 
@@ -38,23 +70,14 @@ namespace MimeDetective.Tests.Documents
         }
 
         [Theory]
-        [InlineData("RichTextWord2016")]
-        public async Task IsRTF(string filePath)
+        [InlineData("PptPowerpoint2016.ppt")]
+        [InlineData("OpenOfficePpt.ppt")]
+        [InlineData("PptxPowerpoint2016.pptx")]
+        public void IsPointPoint(string filePath)
         {
-            var info = GetFileInfo(DocsPath, filePath, ".rtf");
+            var info = GetFileInfo(DocsPath, filePath);
 
-            Assert.True(info.IsRtf());
-
-            await AssertIsType(info, MimeTypes.RTF);
-        }
-
-        [Theory]
-        [InlineData("OpenDocWord2016")]
-        public async Task IsOpenDoc(string filePath)
-        {
-            var info = GetFileInfo(DocsPath, filePath, ".odt");
-
-            await AssertIsType(info, MimeTypes.ODT);
+            Assert.True(info.IsPowerPoint());
         }
 
         [Theory]
@@ -80,11 +103,15 @@ namespace MimeDetective.Tests.Documents
         }
 
         [Theory]
-        [InlineData("XlsExcel2016")]
-        [InlineData("XlsExcel2007")]
+        [InlineData("XlsExcel2016.xls")]
+        [InlineData("XlsExcel2007.xls")]
+        [InlineData("OpenOfficeExcel.xls")]
+        [InlineData("OpenOfficeExcel50.xls")]
+        [InlineData("OpenOfficeExcel95.xls")]
+        [InlineData("XlsxExcel2016.xlsx")]
         public void IsExcel(string filePath)
         {
-            var info = GetFileInfo(DocsPath, filePath, ".xls");
+            var info = GetFileInfo(DocsPath, filePath);
 
             Assert.True(info.IsExcel());
         }

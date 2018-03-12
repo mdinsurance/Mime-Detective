@@ -29,7 +29,7 @@ namespace MimeDetective.Tests.Zip
         {
             var fileInfo = GetFileInfo(dataPath, "Images", ".7z");
 
-            await AssertIsType(fileInfo, MimeTypes.ZIP_7z_2);
+            await AssertIsType(fileInfo, MimeTypes.ZIP_7z);
         }
 
         [Fact]
