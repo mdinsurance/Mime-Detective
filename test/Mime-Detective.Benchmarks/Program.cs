@@ -62,6 +62,7 @@ namespace Mime_Detective.Benchmarks
         const int OpsPerInvoke = 6;
         static readonly LinearCountingAnalyzer linear = new LinearCountingAnalyzer(MimeTypes.Types);
         static readonly DictionaryBasedTrie trie2 = new DictionaryBasedTrie(MimeTypes.Types);
+        static readonly DictionaryBasedTrie2 trie3 = new DictionaryBasedTrie2(MimeTypes.Types);
         static readonly ArrayBasedTrie trie5 = new ArrayBasedTrie(MimeTypes.Types);
 
         static byte[] ReadFile(FileInfo info)
@@ -74,8 +75,32 @@ namespace Mime_Detective.Benchmarks
             return bytes;
         }
 
-        [Benchmark(OperationsPerInvoke = OpsPerInvoke, Baseline = true)]
-        public FileType LinearCountingAnalyzer()
+        [Benchmark]
+        public LinearCountingAnalyzer LinearCountingAnalyzerInsertAll()
+        {
+            return new LinearCountingAnalyzer(MimeTypes.Types);
+        }
+
+        [Benchmark]
+        public DictionaryBasedTrie DictTrieInsertAll()
+        {
+            return new DictionaryBasedTrie(MimeTypes.Types);
+        }
+
+        [Benchmark]
+        public DictionaryBasedTrie2 DictTrie2InsertAll()
+        {
+            return new DictionaryBasedTrie2(MimeTypes.Types);
+        }
+
+        [Benchmark]
+        public ArrayBasedTrie ArrayTrieInsertAll()
+        {
+            return new ArrayBasedTrie(MimeTypes.Types);
+        }
+
+        [Benchmark(OperationsPerInvoke = OpsPerInvoke)]
+        public FileType LinearCountingAnalyzerSearch()
         {
             FileType result = null;
             foreach (var array in files)
@@ -101,6 +126,22 @@ namespace Mime_Detective.Benchmarks
             }
             return result;
         }
+
+
+        [Benchmark(OperationsPerInvoke = OpsPerInvoke)]
+        public FileType DictionaryBasedTrie2()
+        {
+            FileType result = null;
+            foreach (var array in files)
+            {
+                using (ReadResult readResult = new ReadResult(array, MimeTypes.MaxHeaderSize))
+                {
+                    result = trie3.Search(in readResult);
+                }
+            }
+            return result;
+        }
+
 
         [Benchmark(OperationsPerInvoke = OpsPerInvoke)]
         public FileType ArrayBasedTrie()
