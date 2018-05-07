@@ -20,11 +20,12 @@ namespace Mime_Detective.Benchmarks
     {
         public MyConfig()
         {
+            /*
             Add(Job.Default.With(Runtime.Clr)
                 .With(CsProjClassicNetToolchain.Net47)
                 .With(Jit.RyuJit)
                 .With(Platform.X64)
-                .WithId("Net47"));
+                .WithId("Net47"));*/
 
             Add(Job.Default.With(Runtime.Core)
                 .With(CsProjCoreToolchain.NetCoreApp11)
@@ -64,6 +65,7 @@ namespace Mime_Detective.Benchmarks
         static readonly DictionaryBasedTrie trie2 = new DictionaryBasedTrie(MimeTypes.Types);
         static readonly DictionaryBasedTrie2 trie3 = new DictionaryBasedTrie2(MimeTypes.Types);
         static readonly ArrayBasedTrie trie5 = new ArrayBasedTrie(MimeTypes.Types);
+        static readonly ArrayBasedTrie2 trie6 = new ArrayBasedTrie2(MimeTypes.Types);
 
         static byte[] ReadFile(FileInfo info)
         {
@@ -75,28 +77,34 @@ namespace Mime_Detective.Benchmarks
             return bytes;
         }
 
-        [Benchmark]
+        //[Benchmark]
         public LinearCountingAnalyzer LinearCountingAnalyzerInsertAll()
         {
             return new LinearCountingAnalyzer(MimeTypes.Types);
         }
 
-        [Benchmark]
+        //[Benchmark]
         public DictionaryBasedTrie DictTrieInsertAll()
         {
             return new DictionaryBasedTrie(MimeTypes.Types);
         }
 
-        [Benchmark]
+        //[Benchmark]
         public DictionaryBasedTrie2 DictTrie2InsertAll()
         {
             return new DictionaryBasedTrie2(MimeTypes.Types);
         }
 
-        [Benchmark]
+        //[Benchmark]
         public ArrayBasedTrie ArrayTrieInsertAll()
         {
             return new ArrayBasedTrie(MimeTypes.Types);
+        }
+
+        //[Benchmark]
+        public ArrayBasedTrie2 ArrayTrieInsertAll2()
+        {
+            return new ArrayBasedTrie2(MimeTypes.Types);
         }
 
         [Benchmark(OperationsPerInvoke = OpsPerInvoke)]
@@ -152,6 +160,20 @@ namespace Mime_Detective.Benchmarks
                 using (ReadResult readResult = new ReadResult(array, MimeTypes.MaxHeaderSize))
                 {
                     result = trie5.Search(in readResult);
+                }
+            }
+            return result;
+        }
+
+        [Benchmark(OperationsPerInvoke = OpsPerInvoke)]
+        public FileType ArrayBasedTrie2()
+        {
+            FileType result = null;
+            foreach (var array in files)
+            {
+                using (ReadResult readResult = new ReadResult(array, MimeTypes.MaxHeaderSize))
+                {
+                    result = trie6.Search(in readResult);
                 }
             }
             return result;

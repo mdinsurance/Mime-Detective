@@ -48,6 +48,7 @@ namespace MimeDetective.Tests.Analyzers
             analyzer.Insert(MimeTypes.WORD);
         }
 
+
         [Theory]
         [InlineData("./Data/Documents/XlsExcel2016.xls", "xls")]
         [InlineData("./Data/Documents/PptPowerpoint2016.ppt", "ppt")]

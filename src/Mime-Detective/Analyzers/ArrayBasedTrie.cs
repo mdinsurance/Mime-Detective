@@ -7,16 +7,18 @@ namespace MimeDetective.Analyzers
 {
     public sealed class ArrayBasedTrie : IFileAnalyzer
     {
-        public const int NullStandInValue = 256;
-        public const int MaxNodeSize = 257;
+        private const int NullStandInValue = 256;
+        private const int MaxNodeSize = 257;
 
-        private List<OffsetNode> Nodes = new List<OffsetNode>(10);
+        private OffsetNode[] OffsetNodes = new OffsetNode[10];
+        private int offsetNodesLength = 1;
 
         /// <summary>
         /// Constructs an empty ArrayBasedTrie, <see cref="Insert(FileType)"/> to add definitions
         /// </summary>
         public ArrayBasedTrie()
         {
+            OffsetNodes[0] = new OffsetNode(0);
         }
 
         /// <summary>
@@ -28,13 +30,13 @@ namespace MimeDetective.Analyzers
             if (types is null)
                 throw new ArgumentNullException(nameof(types));
 
+            OffsetNodes[0] = new OffsetNode(0);
+
             foreach (var type in types)
             {
                 if ((object)type != null)
                     Insert(type);
             }
-
-            Nodes = Nodes.OrderBy(x => x.Offset).ToList();
         }
 
         public FileType Search(in ReadResult readResult)
@@ -42,53 +44,34 @@ namespace MimeDetective.Analyzers
             FileType match = null;
 
             //iterate through offset nodes
-            for (int offsetNodeIndex = 0; offsetNodeIndex < Nodes.Count; offsetNodeIndex++)
+            for (int offsetNodeIndex = 0; offsetNodeIndex < offsetNodesLength && match is null; offsetNodeIndex++)
             {
                 //get offset node
-                var offsetNode = Nodes[offsetNodeIndex];
-
+                var offsetNode = OffsetNodes[offsetNodeIndex];
                 int i = offsetNode.Offset;
-                byte value = readResult.Array[i];
-
-                var node = offsetNode.Children[value];
-
-                if (node is null)
-                {
-                    node = offsetNode.Children[NullStandInValue];
-
-                    if (node is null)
-                        break;
-                }
-
-                if ((object)node.Record != null)
-                    match = node.Record;
-
-                i++;
+                Node[] prevNode = offsetNode.Children;
+                Node node = offsetNode.Children[readResult.Array[i]];
 
                 //iterate through the current trie
-                for (; i < readResult.ReadLength; i++)
+                for (i++; i < readResult.ReadLength; i++)
                 {
-                    value = readResult.Array[i];
-
-                    var prevNode = node;
-                    node = node.Children[value];
-
                     if (node is null)
                     {
-                        node = prevNode.Children[NullStandInValue];
+                        node = prevNode[NullStandInValue];
 
                         if (node is null)
                             break;
                     }
 
+                    //collect the record
                     if ((object)node.Record != null)
                         match = node.Record;
-                }
 
-                if ((object)match != null)
-                    break;
+                    prevNode = node.Children;
+                    node = node.Children[readResult.Array[i]];
+                }
             }
-       
+
             return match;
         }
 
@@ -97,88 +80,96 @@ namespace MimeDetective.Analyzers
             if (type is null)
                 throw new ArgumentNullException(nameof(type));
 
-            OffsetNode match = null;
+            ref OffsetNode match = ref OffsetNodes[0];
+            bool matchFound = false;
 
-            foreach (var offsetNode in Nodes)
+            for (int offsetNodeIndex = 0; offsetNodeIndex < offsetNodesLength; offsetNodeIndex++)
             {
-                if (offsetNode.Offset == type.HeaderOffset)
+                ref var currentNode = ref OffsetNodes[offsetNodeIndex];
+
+                if (currentNode.Offset == type.HeaderOffset)
                 {
-                    match = offsetNode;
+                    match = ref currentNode;
+                    matchFound = true;
                     break;
                 }
             }
 
-            if (match is null)
+            if (!matchFound)
             {
+                int newNodePos = offsetNodesLength;
+
+                if (newNodePos > OffsetNodes.Length)
+                {
+                    int newOffsetNodeCount = OffsetNodes.Length * 2 + 1;
+                    var newOffsetNodes = new OffsetNode[newOffsetNodeCount];
+                    Array.Copy(OffsetNodes, newOffsetNodes, newOffsetNodeCount);
+                    OffsetNodes = newOffsetNodes;
+                }
+
+                match = ref OffsetNodes[newNodePos];
                 match = new OffsetNode(type.HeaderOffset);
-                Nodes.Add(match);
+                offsetNodesLength++;
             }
 
-            match.Insert(type);
+
+            int i = 0;
+            byte? value = type.Header[i];
+            int arrayPos = value ?? NullStandInValue;
+
+            var node = match.Children[arrayPos];
+
+            if (node is null)
+            {
+                node = new Node();
+                match.Children[arrayPos] = node;
+            }
+
+            i++;
+
+            for (; i < type.Header.Length; i++)
+            {
+                value = type.Header[i];
+                arrayPos = value ?? NullStandInValue;
+                var prevNode = node;
+                node = node.Children[arrayPos];
+
+                if (node is null)
+                {
+                    node = new Node();
+
+                    if (i == type.Header.Length - 1)
+                        node.Record = type;
+
+                    prevNode.Children[arrayPos] = node;
+                }
+            }
         }
 
-        private sealed class OffsetNode
+        private readonly struct OffsetNode
         {
             public readonly ushort Offset;
             public readonly Node[] Children;
 
             public OffsetNode(ushort offset)
             {
-                if (offset > (MimeTypes.MaxHeaderSize - 1))
-                    throw new ArgumentException("Offset cannot be greater than MaxHeaderSize - 1");
-
                 Offset = offset;
                 Children = new Node[MaxNodeSize];
-            }
-
-            public void Insert(FileType type)
-            {
-                int i = 0;
-                byte? value = type.Header[i];
-                int arrayPos = value ?? NullStandInValue;
-
-                var node = Children[arrayPos];
-
-                if (node is null)
-                {
-                    node = new Node(value);
-                    Children[arrayPos] = node;
-                }
-
-                i++;
-
-                for (; i < type.Header.Length; i++)
-                {
-                    value = type.Header[i];
-                    arrayPos = value ?? NullStandInValue;
-                    var prevNode = node;
-                    node = node.Children[arrayPos];
-
-                    if (node is null)
-                    {
-                        var newNode = new Node(value);
-
-                        if (i == type.Header.Length - 1)
-                            newNode.Record = type;
-
-                        node = prevNode.Children[arrayPos] = newNode;
-                    }
-                }
             }
         }
 
         private sealed class Node
         {
-            public readonly Node[] Children;
+            public Node[] Children;
 
             //if complete node then this not null
             public FileType Record;
 
-            public readonly byte? Value;
+            //public byte? Value;
 
-            public Node(byte? value)
+            public Node()
             {
-                Value = value;
+                //Value = value;
                 Children = new Node[MaxNodeSize];
                 Record = null;
             }

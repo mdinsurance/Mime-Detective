@@ -5,16 +5,31 @@ namespace MimeDetective.Analyzers
 {
     public sealed class DictionaryBasedTrie2 : IFileAnalyzer
     {
+        private const int DefaultSize = 7;
         private const ushort NullStandInValue = 256;
+        private const int MaxNodeSize = 257;
 
-        //root dictionary contains the nodes with offset values
-        private Dictionary<ushort, Node> Nodes { get; } = new Dictionary<ushort, Node>();
+        private OffsetNode[] OffsetNodes = new OffsetNode[10];
+        private int offsetNodesLength = 1;
+
+        private readonly struct OffsetNode
+        {
+            public readonly ushort Offset;
+            public readonly Node[] Children;
+
+            public OffsetNode(ushort offset)
+            {
+                Offset = offset;
+                Children = new Node[MaxNodeSize];
+            }
+        }
 
         /// <summary>
         /// Constructs an empty DictionaryBasedTrie
         /// </summary>
         public DictionaryBasedTrie2()
         {
+            OffsetNodes[0] = new OffsetNode(0);
         }
 
         /// <summary>
@@ -25,6 +40,8 @@ namespace MimeDetective.Analyzers
         {
             if (types is null)
                 throw new ArgumentNullException(nameof(types));
+
+            OffsetNodes[0] = new OffsetNode(0);
 
             foreach (var type in types)
             {
@@ -76,16 +93,14 @@ namespace MimeDetective.Analyzers
 
         private sealed class Node
         {
-            //public readonly Dictionary<ushort, Node> Children = new Dictionary<ushort, Node>();
-
             //if complete node then this not null
             public FileType Record;
 
-            public readonly ushort Value;
+            public ushort Value;
 
             private sealed class Entry
             {
-                public ushort _key;
+                //public ushort _key;
                 public Node _value;
                 public Entry _next;
             }
@@ -128,26 +143,6 @@ namespace MimeDetective.Analyzers
                 node.Record = type;
             }
 
-            private const int DefaultSize = 17;
-
-            public Node this[ushort key]
-            {
-                get
-                {
-                    Entry entry = Find(key);
-                    if (entry == null)
-                        throw new KeyNotFoundException("Key not could for entry");
-                    return entry._value;
-                }
-                set
-                {
-                    Entry entry = Find(key);
-                    if (entry != null)
-                        entry._value = value;
-                    else
-                        UncheckedAdd(key, value);
-                }
-            }
 
             public bool TryGetValue(ushort key, out Node value)
             {
@@ -223,7 +218,7 @@ namespace MimeDetective.Analyzers
                     {
                         Entry nextEntry = entry._next;
 
-                        int bucket = GetBucket(entry._key, newNumBuckets);
+                        int bucket = GetBucket(entry._value.Value, newNumBuckets);
                         entry._next = newBuckets[bucket];
                         newBuckets[bucket] = entry;
 
