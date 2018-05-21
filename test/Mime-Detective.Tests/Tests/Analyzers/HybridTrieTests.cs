@@ -8,12 +8,12 @@ using Xunit;
 
 namespace MimeDetective.Tests.Analyzers
 {
-    public class LinearCountingAnalyzerTests
+    public class HybridTrieTests
     {
         [Fact]
         public void DefaultConstructor()
         {
-            var analyzer = new LinearCountingAnalyzer();
+            var analyzer = new HybridTrie();
 
             //assertion here just to have
             Assert.NotNull(analyzer);
@@ -24,11 +24,11 @@ namespace MimeDetective.Tests.Analyzers
         [Fact]
         public void EnumerableConstructor()
         {
-            var analyzer = new LinearCountingAnalyzer(MimeTypes.Types);
+            var analyzer = new HybridTrie(MimeTypes.Types);
 
             //assertion here just to have
             Assert.NotNull(analyzer);
-            Assert.Throws<ArgumentNullException>(() => new LinearCountingAnalyzer(null));
+            Assert.Throws<ArgumentNullException>(() => new HybridTrie(null));
 
             analyzer.Insert(MimeTypes.WORD);
         }
@@ -36,7 +36,7 @@ namespace MimeDetective.Tests.Analyzers
         [Fact]
         public void Insert()
         {
-            var analyzer = new LinearCountingAnalyzer();
+            var analyzer = new HybridTrie();
             Assert.Throws<ArgumentNullException>(() => analyzer.Insert(null));
 
             foreach (var fileType in MimeTypes.Types)
@@ -64,7 +64,7 @@ namespace MimeDetective.Tests.Analyzers
         [InlineData("./Data/Assemblies/ManagedDLL.dll", "dll")]
         public async Task Search(string path, string ext)
         {
-            var analyzer = new LinearCountingAnalyzer(MimeTypes.Types);
+            var analyzer = new HybridTrie(MimeTypes.Types);
             FileInfo file = new FileInfo(path);
             FileType type = null;
 
@@ -80,7 +80,7 @@ namespace MimeDetective.Tests.Analyzers
         [Fact]
         public void InsertZeroOffsetFirstWildCard()
         {
-            var analyzer = new LinearCountingAnalyzer();
+            var analyzer = new HybridTrie();
             FileType fileType = new FileType(new byte?[1], "ext", "app/ext", 0);
             analyzer.Insert(fileType);
             ReadResult readResult = new ReadResult(new byte[1], 1);
@@ -93,7 +93,7 @@ namespace MimeDetective.Tests.Analyzers
         [Fact]
         public void InsertLastOffsetWildCard()
         {
-            var analyzer = new LinearCountingAnalyzer();
+            var analyzer = new HybridTrie();
             FileType fileType = new FileType(new byte?[1], "ext", "app/ext", 559);
             analyzer.Insert(fileType);
             ReadResult readResult = new ReadResult(new byte[560], 560);
@@ -106,7 +106,7 @@ namespace MimeDetective.Tests.Analyzers
         [Fact]
         public void InsertLastOffsetWildCardFull()
         {
-            var analyzer = new LinearCountingAnalyzer();
+            var analyzer = new HybridTrie();
             FileType fileType = new FileType(new byte?[560], "ext", "app/ext", 559);
             analyzer.Insert(fileType);
             ReadResult readResult = new ReadResult(new byte[1120], 1120);
@@ -119,12 +119,12 @@ namespace MimeDetective.Tests.Analyzers
         [Fact]
         public void IncrementalInsertSearchBoundries()
         {
-            var analyzer = new LinearCountingAnalyzer();
+            var analyzer = new HybridTrie();
 
             for (int i = 0; i < 560; i++)
             {
                 var bytes = new byte?[1];
-                FileType fileType = new FileType(bytes, "ext" + i, "app/ext" + i, (ushort)i);
+                FileType fileType = new FileType(bytes, "ext" + i, "app/ext" + 1, (ushort)i);
                 analyzer.Insert(fileType);
 
                 var bytes1 = new byte[i + 1];
@@ -140,13 +140,13 @@ namespace MimeDetective.Tests.Analyzers
         [Fact]
         public void InsertSearchBoundries()
         {
-            var analyzer = new LinearCountingAnalyzer();
+            var analyzer = new HybridTrie();
             List<FileType> fileTypes = new List<FileType>();
 
             for (int i = 0; i < 560; i++)
             {
                 var bytes = new byte?[1];
-                FileType fileType = new FileType(bytes, "ext" + i, "app/ext" + i, (ushort)i);
+                FileType fileType = new FileType(bytes, "ext" + i, "app/ext" + 1, (ushort)i);
                 analyzer.Insert(fileType);
                 fileTypes.Add(fileType);
             }

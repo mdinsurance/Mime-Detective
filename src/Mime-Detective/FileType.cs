@@ -32,7 +32,7 @@ namespace MimeDetective
             Header = header ?? throw new ArgumentNullException(nameof(header), $"cannot be null, {nameof(FileType)} needs file header data");
 
             if (offset > (MimeTypes.MaxHeaderSize - 1))
-                throw new ArgumentException("Header Offset cannot exceed Max Header Size - 1");
+                throw new ArgumentException($"Header Offset cannot exceed Max Header Size {MimeTypes.MaxHeaderSize} - 1");
 
             HeaderOffset = offset;
             Extension = extension;

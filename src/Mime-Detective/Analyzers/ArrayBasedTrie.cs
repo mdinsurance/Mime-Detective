@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 using System.Linq;
+using System.Runtime.InteropServices;
 
 namespace MimeDetective.Analyzers
 {
@@ -39,36 +40,43 @@ namespace MimeDetective.Analyzers
             }
         }
 
+        //TODO need tests for highestmatching count behavior
         public FileType Search(in ReadResult readResult)
         {
             FileType match = null;
+            int highestMatchingCount = 0;
 
             //iterate through offset nodes
-            for (int offsetNodeIndex = 0; offsetNodeIndex < offsetNodesLength && match is null; offsetNodeIndex++)
+            for (int offsetNodeIndex = 0; offsetNodeIndex < offsetNodesLength; offsetNodeIndex++)
             {
-                //get offset node
-                var offsetNode = OffsetNodes[offsetNodeIndex];
+                OffsetNode offsetNode = OffsetNodes[offsetNodeIndex];
                 int i = offsetNode.Offset;
                 Node[] prevNode = offsetNode.Children;
-                Node node = offsetNode.Children[readResult.Array[i]];
 
-                //iterate through the current trie
-                for (i++; i < readResult.ReadLength; i++)
+                while (i < readResult.ReadLength)
                 {
-                    if (node is null)
+                    int currentVal = readResult.Array[i];
+                    Node node = prevNode[currentVal];
+
+                    if (node.Children == null)
                     {
                         node = prevNode[NullStandInValue];
 
-                        if (node is null)
+                        if (node.Children is null)
                             break;
                     }
 
+                    //increment here
+                    i++;
+
                     //collect the record
-                    if ((object)node.Record != null)
+                    if (i > highestMatchingCount && (object)node.Record != null)
+                    {
                         match = node.Record;
+                        highestMatchingCount = i;
+                    }
 
                     prevNode = node.Children;
-                    node = node.Children[readResult.Array[i]];
                 }
             }
 
@@ -99,11 +107,11 @@ namespace MimeDetective.Analyzers
             {
                 int newNodePos = offsetNodesLength;
 
-                if (newNodePos > OffsetNodes.Length)
+                if (newNodePos >= OffsetNodes.Length)
                 {
                     int newOffsetNodeCount = OffsetNodes.Length * 2 + 1;
                     var newOffsetNodes = new OffsetNode[newOffsetNodeCount];
-                    Array.Copy(OffsetNodes, newOffsetNodes, newOffsetNodeCount);
+                    Array.Copy(OffsetNodes, newOffsetNodes, offsetNodesLength);
                     OffsetNodes = newOffsetNodes;
                 }
 
@@ -112,40 +120,28 @@ namespace MimeDetective.Analyzers
                 offsetNodesLength++;
             }
 
+            Node[] prevNode = match.Children;
 
-            int i = 0;
-            byte? value = type.Header[i];
-            int arrayPos = value ?? NullStandInValue;
-
-            var node = match.Children[arrayPos];
-
-            if (node is null)
+            for (int i = 0; i < type.Header.Length; i++)
             {
-                node = new Node();
-                match.Children[arrayPos] = node;
-            }
+                byte? value = type.Header[i];
+                int arrayPos = value ?? NullStandInValue;
+                ref Node node = ref prevNode[arrayPos];
 
-            i++;
-
-            for (; i < type.Header.Length; i++)
-            {
-                value = type.Header[i];
-                arrayPos = value ?? NullStandInValue;
-                var prevNode = node;
-                node = node.Children[arrayPos];
-
-                if (node is null)
+                if (node.Children is null)
                 {
-                    node = new Node();
+                    FileType record = null;
 
                     if (i == type.Header.Length - 1)
-                        node.Record = type;
+                        record = type;
 
-                    prevNode.Children[arrayPos] = node;
+                    node = new Node(record);
                 }
+
+                prevNode = node.Children;
             }
         }
-
+        
         private readonly struct OffsetNode
         {
             public readonly ushort Offset;
@@ -158,20 +154,17 @@ namespace MimeDetective.Analyzers
             }
         }
 
-        private sealed class Node
+        private struct Node
         {
             public Node[] Children;
 
             //if complete node then this not null
             public FileType Record;
 
-            //public byte? Value;
-
-            public Node()
+            public Node(FileType record)
             {
-                //Value = value;
                 Children = new Node[MaxNodeSize];
-                Record = null;
+                Record = record;
             }
         }
     }

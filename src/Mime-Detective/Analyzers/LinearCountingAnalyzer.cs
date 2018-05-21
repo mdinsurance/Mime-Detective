@@ -57,18 +57,19 @@ namespace MimeDetective.Analyzers
 
                 uint matchingCount = 0;
                 int iOffset = type.HeaderOffset;
-                int readLength = iOffset + type.Header.Length;
+                int readEnd = iOffset + type.Header.Length;
 
-                if (readLength > readResult.ReadLength)
+                if (readEnd > readResult.ReadLength)
                     continue;
 
-                for (int i = 0; iOffset < readLength; i++, iOffset++)
+                for (int i = 0; iOffset < readEnd; i++, iOffset++)
                 {
                     if (type.Header[i] is null || type.Header[i].Value == readResult.Array[iOffset])
                         matchingCount++;
                 }
 
-                if (type.Header.Length == matchingCount && matchingCount > highestMatchingCount)
+                //TODO should this be default behavior
+                if (type.Header.Length == matchingCount && matchingCount >= highestMatchingCount)
                 {
                     highestMatchingType = type;
                     highestMatchingCount = matchingCount;

@@ -63,9 +63,8 @@ namespace Mime_Detective.Benchmarks
         const int OpsPerInvoke = 6;
         static readonly LinearCountingAnalyzer linear = new LinearCountingAnalyzer(MimeTypes.Types);
         static readonly DictionaryBasedTrie trie2 = new DictionaryBasedTrie(MimeTypes.Types);
-        static readonly DictionaryBasedTrie2 trie3 = new DictionaryBasedTrie2(MimeTypes.Types);
+        static readonly HybridTrie trie3 = new HybridTrie(MimeTypes.Types);
         static readonly ArrayBasedTrie trie5 = new ArrayBasedTrie(MimeTypes.Types);
-        static readonly ArrayBasedTrie2 trie6 = new ArrayBasedTrie2(MimeTypes.Types);
 
         static byte[] ReadFile(FileInfo info)
         {
@@ -90,21 +89,15 @@ namespace Mime_Detective.Benchmarks
         }
 
         //[Benchmark]
-        public DictionaryBasedTrie2 DictTrie2InsertAll()
-        {
-            return new DictionaryBasedTrie2(MimeTypes.Types);
-        }
-
-        //[Benchmark]
         public ArrayBasedTrie ArrayTrieInsertAll()
         {
             return new ArrayBasedTrie(MimeTypes.Types);
         }
 
         //[Benchmark]
-        public ArrayBasedTrie2 ArrayTrieInsertAll2()
+        public HybridTrie HybridTrieInsertAll()
         {
-            return new ArrayBasedTrie2(MimeTypes.Types);
+            return new HybridTrie(MimeTypes.Types);
         }
 
         [Benchmark(OperationsPerInvoke = OpsPerInvoke)]
@@ -122,7 +115,7 @@ namespace Mime_Detective.Benchmarks
         }
 
         [Benchmark(OperationsPerInvoke = OpsPerInvoke)]
-        public FileType DictionaryBasedTrie()
+        public FileType DictionaryTrieSearch()
         {
             FileType result = null;
             foreach (var array in files)
@@ -137,7 +130,7 @@ namespace Mime_Detective.Benchmarks
 
 
         [Benchmark(OperationsPerInvoke = OpsPerInvoke)]
-        public FileType DictionaryBasedTrie2()
+        public FileType HybridTrieSearch()
         {
             FileType result = null;
             foreach (var array in files)
@@ -152,7 +145,7 @@ namespace Mime_Detective.Benchmarks
 
 
         [Benchmark(OperationsPerInvoke = OpsPerInvoke)]
-        public FileType ArrayBasedTrie()
+        public FileType ArrayTrieSearch()
         {
             FileType result = null;
             foreach (var array in files)
@@ -160,20 +153,6 @@ namespace Mime_Detective.Benchmarks
                 using (ReadResult readResult = new ReadResult(array, MimeTypes.MaxHeaderSize))
                 {
                     result = trie5.Search(in readResult);
-                }
-            }
-            return result;
-        }
-
-        [Benchmark(OperationsPerInvoke = OpsPerInvoke)]
-        public FileType ArrayBasedTrie2()
-        {
-            FileType result = null;
-            foreach (var array in files)
-            {
-                using (ReadResult readResult = new ReadResult(array, MimeTypes.MaxHeaderSize))
-                {
-                    result = trie6.Search(in readResult);
                 }
             }
             return result;

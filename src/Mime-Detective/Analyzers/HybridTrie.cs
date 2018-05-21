@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace MimeDetective.Analyzers
 {
-    public sealed class DictionaryBasedTrie2 : IFileAnalyzer
+    public sealed class HybridTrie : IFileAnalyzer
     {
         private const int DefaultSize = 7;
         private const ushort NullStandInValue = 256;
@@ -27,7 +27,7 @@ namespace MimeDetective.Analyzers
         /// <summary>
         /// Constructs an empty DictionaryBasedTrie
         /// </summary>
-        public DictionaryBasedTrie2()
+        public HybridTrie()
         {
             OffsetNodes[0] = new OffsetNode(0);
         }
@@ -36,7 +36,7 @@ namespace MimeDetective.Analyzers
         /// Constructs a DictionaryBasedTrie from an Enumerable of FileTypes
         /// </summary>
         /// <param name="types"></param>
-        public DictionaryBasedTrie2(IEnumerable<FileType> types)
+        public HybridTrie(IEnumerable<FileType> types)
         {
             if (types is null)
                 throw new ArgumentNullException(nameof(types));
@@ -52,13 +52,37 @@ namespace MimeDetective.Analyzers
         public FileType Search(in ReadResult readResult)
         {
             FileType match = null;
-            var enumerator = Nodes.GetEnumerator();
+            int highestMatchingCount = 0;
 
-            while (match is null && enumerator.MoveNext())
+            //iterate through offset nodes
+            for (int offsetNodeIndex = 0; offsetNodeIndex < offsetNodesLength; offsetNodeIndex++)
             {
-                Node node = enumerator.Current.Value;
+                //get offset node
+                var offsetNode = OffsetNodes[offsetNodeIndex];
+                int i = offsetNode.Offset;
 
-                for (int i = node.Value; i < readResult.ReadLength; i++)
+                if (!(i < readResult.ReadLength))
+                    continue;
+
+                Node node = offsetNode.Children[readResult.Array[i]];
+
+                if (node == null)
+                {
+                    node = offsetNode.Children[NullStandInValue];
+
+                    if (node is null)
+                        continue;
+                }
+
+                i++;
+
+                if (i > highestMatchingCount && (object)node.Record != null)
+                {
+                    match = node.Record;
+                    highestMatchingCount = i;
+                }
+
+                while (i < readResult.ReadLength)
                 {
                     Node prevNode = node;
 
@@ -66,12 +90,14 @@ namespace MimeDetective.Analyzers
                         && !prevNode.TryGetValue(NullStandInValue, out node))
                         break;
 
-                    if ((object)node.Record != null)
-                        match = node.Record;
-                }
+                    i++;
 
-                if ((object)match != null)
-                    break;
+                    if (i > highestMatchingCount && (object)node.Record != null)
+                    {
+                        match = node.Record;
+                        highestMatchingCount = i;
+                    }
+                }
             }
 
             return match;
@@ -82,13 +108,71 @@ namespace MimeDetective.Analyzers
             if (type is null)
                 throw new ArgumentNullException(nameof(type));
 
-            if (!Nodes.TryGetValue(type.HeaderOffset, out var offsetNode))
+            ref OffsetNode match = ref OffsetNodes[0];
+            bool matchFound = false;
+
+            for (int offsetNodeIndex = 0; offsetNodeIndex < offsetNodesLength; offsetNodeIndex++)
             {
-                offsetNode = new Node(type.HeaderOffset);
-                Nodes.Add(type.HeaderOffset, offsetNode);
+                ref var currentNode = ref OffsetNodes[offsetNodeIndex];
+
+                if (currentNode.Offset == type.HeaderOffset)
+                {
+                    match = ref currentNode;
+                    matchFound = true;
+                    break;
+                }
             }
 
-            offsetNode.Insert(type);
+            //handle expanding collection
+            if (!matchFound)
+            {
+                int newNodePos = offsetNodesLength;
+
+                if (newNodePos >= OffsetNodes.Length)
+                {
+                    int newOffsetNodeCount = OffsetNodes.Length * 2 + 1;
+                    var newOffsetNodes = new OffsetNode[newOffsetNodeCount];
+                    Array.Copy(OffsetNodes, newOffsetNodes, offsetNodesLength);
+                    OffsetNodes = newOffsetNodes;
+                }
+
+                match = ref OffsetNodes[newNodePos];
+                match = new OffsetNode(type.HeaderOffset);
+                offsetNodesLength++;
+            }
+
+            int i = 0;
+            byte? value = type.Header[i];
+            int arrayPos = value ?? NullStandInValue;
+
+            var node = match.Children[arrayPos];
+
+            if (node is null)
+            {
+                node = new Node((ushort)arrayPos);
+                match.Children[arrayPos] = node;
+            }
+
+            i++;
+
+            for (; i < type.Header.Length; i++)
+            {
+                value = type.Header[i];
+                arrayPos = value ?? NullStandInValue;
+                var prevNode = node;
+
+                if (!node.TryGetValue((ushort)arrayPos, out node))
+                {
+                    node = new Node((ushort)arrayPos);
+
+                    //if (i == type.Header.Length - 1)
+                      //  node.Record = type;
+
+                    prevNode.Add((ushort)arrayPos, node);
+                }
+            }
+
+            node.Record = type;
         }
 
         private sealed class Node
@@ -113,36 +197,6 @@ namespace MimeDetective.Analyzers
                 Value = value;
                 Clear(DefaultSize);
             }
-
-            public void Insert(FileType type)
-            {
-                int i = 0;
-                ushort value = type.Header[i] ?? NullStandInValue;
-
-                if (!TryGetValue(value, out Node node))
-                {
-                    node = new Node(value);
-                    Add(value, node);
-                }
-
-                i++;
-
-                for (; i < type.Header.Length; i++)
-                {
-                    value = type.Header[i] ?? NullStandInValue;
-
-                    if (!node.TryGetValue(value, out var newNode))
-                    {
-                        newNode = new Node(value);
-                        node.Add(value, newNode);
-                    }
-
-                    node = newNode;//node[value];
-                }
-
-                node.Record = type;
-            }
-
 
             public bool TryGetValue(ushort key, out Node value)
             {
@@ -180,7 +234,7 @@ namespace MimeDetective.Analyzers
                 Entry entry = _buckets[bucket];
                 while (entry != null)
                 {
-                    if (key == entry._key)
+                    if (key == entry._value.Value)
                         return entry;
 
                     entry = entry._next;
@@ -192,7 +246,6 @@ namespace MimeDetective.Analyzers
             {
                 Entry entry = new Entry
                 {
-                    _key = key,
                     _value = value
                 };
 
