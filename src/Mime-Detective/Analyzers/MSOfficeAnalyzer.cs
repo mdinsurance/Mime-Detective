@@ -11,11 +11,11 @@ namespace MimeDetective.Analyzers
 
         public static FileType[] MsDocTypes { get; } = new FileType[] { MimeTypes.PPT, MimeTypes.WORD, MimeTypes.EXCEL };
 
-        private readonly DictionaryBasedTrie dictTrie;
+        private readonly DictionaryTrie dictTrie;
 
         public MsOfficeAnalyzer()
         {
-            dictTrie = new DictionaryBasedTrie(MsDocTypes);
+            dictTrie = new DictionaryTrie(MsDocTypes);
         }
 
         public FileType Search(in ReadResult readResult)

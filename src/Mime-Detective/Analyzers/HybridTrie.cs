@@ -39,13 +39,14 @@ namespace MimeDetective.Analyzers
         public HybridTrie(IEnumerable<FileType> types)
         {
             if (types is null)
-                throw new ArgumentNullException(nameof(types));
+                ThrowHelpers.FileTypeArgumentIsNull();
 
             OffsetNodes[0] = new OffsetNode(0);
 
             foreach (var type in types)
             {
-                Insert(type);
+                if ((object)type != null)
+                    Insert(type);
             }
         }
 
@@ -106,7 +107,7 @@ namespace MimeDetective.Analyzers
         public void Insert(FileType type)
         {
             if (type is null)
-                throw new ArgumentNullException(nameof(type));
+                ThrowHelpers.FileTypeArgumentIsNull();
 
             ref OffsetNode match = ref OffsetNodes[0];
             bool matchFound = false;
@@ -175,6 +176,7 @@ namespace MimeDetective.Analyzers
             node.Record = type;
         }
 
+        //TODO make a base-1 dict
         private sealed class Node
         {
             //if complete node then this not null

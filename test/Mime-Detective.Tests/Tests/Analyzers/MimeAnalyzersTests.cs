@@ -12,7 +12,7 @@ namespace MimeDetective.Tests.Analyzers
         public void DefaultPrimaryAnalyzerNotNullOrEmpty()
         {
             Assert.NotNull(MimeAnalyzers.PrimaryAnalyzer);
-            Assert.IsType<DictionaryBasedTrie>(MimeAnalyzers.PrimaryAnalyzer);
+            Assert.IsType<DictionaryTrie>(MimeAnalyzers.PrimaryAnalyzer);
         }
 
         [Fact]

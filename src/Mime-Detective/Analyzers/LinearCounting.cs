@@ -4,14 +4,14 @@ using System.Text;
 
 namespace MimeDetective.Analyzers
 {
-    public class LinearCountingAnalyzer : IFileAnalyzer
+    public class LinearCounting : IFileAnalyzer
     {
         private readonly List<FileType> types;
 
         /// <summary>
         /// Constructs an empty LinearCountingAnalyzer, use <see cref="Insert(FileType)"/> to add file types
         /// </summary>
-        public LinearCountingAnalyzer()
+        public LinearCounting()
         {
             types = new List<FileType>();
         }
@@ -20,10 +20,10 @@ namespace MimeDetective.Analyzers
         /// Constructs a LinearCountingAnalyzer using the supplied IEnumerable<FileType>
         /// </summary>
         /// <param name="fileTypes"></param>
-        public LinearCountingAnalyzer(IEnumerable<FileType> fileTypes)
+        public LinearCounting(IEnumerable<FileType> fileTypes)
         {
             if (fileTypes is null)
-                throw new ArgumentNullException(nameof(fileTypes));
+                ThrowHelpers.FileTypeEnumerableIsNull();
 
             types = new List<FileType>();
 
@@ -37,7 +37,7 @@ namespace MimeDetective.Analyzers
         public void Insert(FileType fileType)
         {
             if (fileType is null)
-                throw new ArgumentNullException(nameof(fileType));
+                ThrowHelpers.FileTypeArgumentIsNull();
 
             types.Add(fileType);
         }
@@ -68,7 +68,7 @@ namespace MimeDetective.Analyzers
                         matchingCount++;
                 }
 
-                //TODO should this be default behavior
+                //TODO should this be default behavior?
                 if (type.Header.Length == matchingCount && matchingCount >= highestMatchingCount)
                 {
                     highestMatchingType = type;

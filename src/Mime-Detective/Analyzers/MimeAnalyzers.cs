@@ -9,7 +9,7 @@ namespace MimeDetective
     /// </summary>
     public static class MimeAnalyzers
     {
-        private static IFileAnalyzer primaryAnalyzer = new DictionaryBasedTrie(MimeTypes.Types);
+        private static IFileAnalyzer primaryAnalyzer = new DictionaryTrie(MimeTypes.Types);
 
         /// <summary>
         ///

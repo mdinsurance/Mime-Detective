@@ -13,7 +13,7 @@ namespace MimeDetective.Tests.Analyzers
         [Fact]
         public void DefaultConstructor()
         {
-            var analyzer = new DictionaryBasedTrie();
+            var analyzer = new DictionaryTrie();
 
             //assertion here just to have
             Assert.NotNull(analyzer);
@@ -24,11 +24,11 @@ namespace MimeDetective.Tests.Analyzers
         [Fact]
         public void EnumerableConstructor()
         {
-            var analyzer = new DictionaryBasedTrie(MimeTypes.Types);
+            var analyzer = new DictionaryTrie(MimeTypes.Types);
 
             //assertion here just to have
             Assert.NotNull(analyzer);
-            Assert.Throws<ArgumentNullException>(() => new DictionaryBasedTrie(null));
+            Assert.Throws<ArgumentNullException>(() => new DictionaryTrie(null));
 
             analyzer.Insert(MimeTypes.WORD);
         }
@@ -36,7 +36,7 @@ namespace MimeDetective.Tests.Analyzers
         [Fact]
         public void Insert()
         {
-            var analyzer = new DictionaryBasedTrie();
+            var analyzer = new DictionaryTrie();
             Assert.Throws<ArgumentNullException>(() => analyzer.Insert(null));
 
             foreach (var fileType in MimeTypes.Types)
@@ -68,7 +68,7 @@ namespace MimeDetective.Tests.Analyzers
         [InlineData("./Data/Assemblies/ManagedDLL.dll", "dll")]
         public async Task Search(string path, string ext)
         {
-            var analyzer = new DictionaryBasedTrie(MimeTypes.Types);
+            var analyzer = new DictionaryTrie(MimeTypes.Types);
             FileInfo file = new FileInfo(path);
             FileType type = null;
 
@@ -84,7 +84,7 @@ namespace MimeDetective.Tests.Analyzers
         [Fact]
         public void InsertZeroOffsetFirstWildCard()
         {
-            var analyzer = new DictionaryBasedTrie();
+            var analyzer = new DictionaryTrie();
             FileType fileType = new FileType(new byte?[1], "ext", "app/ext", 0);
             analyzer.Insert(fileType);
             ReadResult readResult = new ReadResult(new byte[1], 1);
@@ -97,7 +97,7 @@ namespace MimeDetective.Tests.Analyzers
         [Fact]
         public void InsertLastOffsetWildCard()
         {
-            var analyzer = new DictionaryBasedTrie();
+            var analyzer = new DictionaryTrie();
             FileType fileType = new FileType(new byte?[1], "ext", "app/ext", 559);
             analyzer.Insert(fileType);
             ReadResult readResult = new ReadResult(new byte[560], 560);
@@ -110,7 +110,7 @@ namespace MimeDetective.Tests.Analyzers
         [Fact]
         public void InsertLastOffsetWildCardFull()
         {
-            var analyzer = new DictionaryBasedTrie();
+            var analyzer = new DictionaryTrie();
             FileType fileType = new FileType(new byte?[560], "ext", "app/ext", 559);
             analyzer.Insert(fileType);
             ReadResult readResult = new ReadResult(new byte[1120], 1120);
@@ -123,7 +123,7 @@ namespace MimeDetective.Tests.Analyzers
         [Fact]
         public void IncrementalInsertSearchBoundries()
         {
-            var analyzer = new DictionaryBasedTrie();
+            var analyzer = new DictionaryTrie();
 
             for (int i = 0; i < 560; i++)
             {
@@ -144,7 +144,7 @@ namespace MimeDetective.Tests.Analyzers
         [Fact]
         public void InsertSearchBoundries()
         {
-            var analyzer = new DictionaryBasedTrie();
+            var analyzer = new DictionaryTrie();
             List<FileType> fileTypes = new List<FileType>();
 
             for (int i = 0; i < 560; i++)

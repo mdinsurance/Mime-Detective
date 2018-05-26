@@ -4,7 +4,7 @@ using System.Text;
 
 namespace MimeDetective.Analyzers
 {
-    public sealed class DictionaryBasedTrie : IFileAnalyzer
+    public sealed class DictionaryTrie : IFileAnalyzer
     {
         private const ushort NullStandInValue = 256;
 
@@ -14,7 +14,7 @@ namespace MimeDetective.Analyzers
         /// <summary>
         /// Constructs an empty DictionaryBasedTrie
         /// </summary>
-        public DictionaryBasedTrie()
+        public DictionaryTrie()
         {
 
         }
@@ -23,14 +23,15 @@ namespace MimeDetective.Analyzers
         /// Constructs a DictionaryBasedTrie from an Enumerable of FileTypes
         /// </summary>
         /// <param name="types"></param>
-        public DictionaryBasedTrie(IEnumerable<FileType> types)
+        public DictionaryTrie(IEnumerable<FileType> types)
         {
             if (types is null)
-                throw new ArgumentNullException(nameof(types));
+                ThrowHelpers.FileTypeEnumerableIsNull();
 
             foreach (var type in types)
             {
-                Insert(type);
+                if ((object)type != null)
+                    Insert(type);
             }
         }
 
@@ -69,7 +70,7 @@ namespace MimeDetective.Analyzers
         public void Insert(FileType type)
         {
             if (type is null)
-                throw new ArgumentNullException(nameof(type));
+                ThrowHelpers.FileTypeArgumentIsNull();
 
             if (!Nodes.TryGetValue(type.HeaderOffset, out var offsetNode))
             {

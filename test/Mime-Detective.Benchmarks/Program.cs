@@ -14,7 +14,7 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using MimeDetective.Analyzers;
 
-namespace Mime_Detective.Benchmarks
+namespace MimeDetective.Benchmarks
 {
     public class MyConfig : ManualConfig
     {
@@ -26,12 +26,12 @@ namespace Mime_Detective.Benchmarks
                 .With(Jit.RyuJit)
                 .With(Platform.X64)
                 .WithId("Net47"));*/
-
+            /*
             Add(Job.Default.With(Runtime.Core)
                 .With(CsProjCoreToolchain.NetCoreApp11)
                 .With(Platform.X64)
                 .With(Jit.RyuJit)
-                .WithId("NetCore1.1"));
+                .WithId("NetCore1.1"));*/
 
             Add(Job.Default.With(Runtime.Core)
                 .With(CsProjCoreToolchain.NetCoreApp20)
@@ -61,10 +61,10 @@ namespace Mime_Detective.Benchmarks
         };
 
         const int OpsPerInvoke = 6;
-        static readonly LinearCountingAnalyzer linear = new LinearCountingAnalyzer(MimeTypes.Types);
-        static readonly DictionaryBasedTrie trie2 = new DictionaryBasedTrie(MimeTypes.Types);
-        static readonly HybridTrie trie3 = new HybridTrie(MimeTypes.Types);
-        static readonly ArrayBasedTrie trie5 = new ArrayBasedTrie(MimeTypes.Types);
+        static readonly LinearCounting linear = new LinearCounting(MimeTypes.Types);
+        static readonly DictionaryTrie dict = new DictionaryTrie(MimeTypes.Types);
+        static readonly HybridTrie hybrid = new HybridTrie(MimeTypes.Types);
+        static readonly ArrayTrie array = new ArrayTrie(MimeTypes.Types);
 
         static byte[] ReadFile(FileInfo info)
         {
@@ -76,25 +76,25 @@ namespace Mime_Detective.Benchmarks
             return bytes;
         }
 
-        //[Benchmark]
-        public LinearCountingAnalyzer LinearCountingAnalyzerInsertAll()
+        [Benchmark]
+        public LinearCounting LinearCountingAnalyzerInsertAll()
         {
-            return new LinearCountingAnalyzer(MimeTypes.Types);
+            return new LinearCounting(MimeTypes.Types);
         }
 
-        //[Benchmark]
-        public DictionaryBasedTrie DictTrieInsertAll()
+        [Benchmark]
+        public DictionaryTrie DictTrieInsertAll()
         {
-            return new DictionaryBasedTrie(MimeTypes.Types);
+            return new DictionaryTrie(MimeTypes.Types);
         }
 
-        //[Benchmark]
-        public ArrayBasedTrie ArrayTrieInsertAll()
+        [Benchmark]
+        public ArrayTrie ArrayTrieInsertAll()
         {
-            return new ArrayBasedTrie(MimeTypes.Types);
+            return new ArrayTrie(MimeTypes.Types);
         }
 
-        //[Benchmark]
+        [Benchmark]
         public HybridTrie HybridTrieInsertAll()
         {
             return new HybridTrie(MimeTypes.Types);
@@ -122,7 +122,7 @@ namespace Mime_Detective.Benchmarks
             {
                 using (ReadResult readResult = new ReadResult(array, MimeTypes.MaxHeaderSize))
                 {
-                    result = trie2.Search(in readResult);
+                    result = dict.Search(in readResult);
                 }
             }
             return result;
@@ -137,7 +137,7 @@ namespace Mime_Detective.Benchmarks
             {
                 using (ReadResult readResult = new ReadResult(array, MimeTypes.MaxHeaderSize))
                 {
-                    result = trie3.Search(in readResult);
+                    result = hybrid.Search(in readResult);
                 }
             }
             return result;
@@ -152,7 +152,7 @@ namespace Mime_Detective.Benchmarks
             {
                 using (ReadResult readResult = new ReadResult(array, MimeTypes.MaxHeaderSize))
                 {
-                    result = trie5.Search(in readResult);
+                    result = TypeLookup.array.Search(in readResult);
                 }
             }
             return result;
