@@ -229,6 +229,7 @@ namespace MimeDetective
 
         #endregion Constants
 
+        /*
         public static void SaveToXmlFile(string path, IEnumerable<FileType> types)
         {
             using (FileStream file = File.OpenWrite(path))
@@ -246,7 +247,7 @@ namespace MimeDetective
 
                 return (FileType[])serializer.Deserialize(file);
             }
-        }
+        }*/
 
         /// <summary>
         /// Gets the list of FileTypes based on list of extensions in Comma-Separated-Values string

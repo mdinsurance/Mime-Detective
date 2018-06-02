@@ -102,17 +102,16 @@ namespace MimeDetective.Analyzers
 
             if (!matchFound)
             {
-                int newNodePos = offsetNodesLength;
-
-                if (newNodePos >= OffsetNodes.Length)
+                if (offsetNodesLength >= OffsetNodes.Length)
                 {
-                    int newOffsetNodeCount = OffsetNodes.Length * 2 + 1;
+                    int newOffsetNodeCalc = OffsetNodes.Length * 2 + 1;
+                    int newOffsetNodeCount = newOffsetNodeCalc > 560 ? 560 : newOffsetNodeCalc;
                     var newOffsetNodes = new OffsetNode[newOffsetNodeCount];
                     Array.Copy(OffsetNodes, newOffsetNodes, offsetNodesLength);
                     OffsetNodes = newOffsetNodes;
                 }
 
-                match = ref OffsetNodes[newNodePos];
+                match = ref OffsetNodes[offsetNodesLength];
                 match = new OffsetNode(type.HeaderOffset);
                 offsetNodesLength++;
             }
@@ -152,15 +151,7 @@ namespace MimeDetective.Analyzers
         {
             public Node[] Children;
 
-            //if complete node then this not null
             public FileType Record;
-
-            /*
-            public Node(FileType record)
-            {
-                Children = new Node[MaxNodeSize];
-                Record = record;
-            }*/
         }
     }
 }

@@ -14,7 +14,8 @@ namespace MimeDetective
         /// <returns>FileType or null not identified</returns>
         public static FileType GetFileType(this byte[] bytes)
         {
-            using (ReadResult readResult = new ReadResult(bytes, Math.Min(bytes.Length, MimeTypes.MaxHeaderSize)))
+            int min = bytes.Length > MimeTypes.MaxHeaderSize ? MimeTypes.MaxHeaderSize : bytes.Length;
+            using (ReadResult readResult = new ReadResult(bytes, min))
             {
                 return MimeAnalyzers.GetFileType(in readResult);
             }

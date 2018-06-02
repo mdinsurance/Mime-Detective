@@ -32,7 +32,7 @@ namespace MimeDetective.Tests.Analyzers
         }
     }
 
-    public class ArrayBasedTrieTests
+    public class TrieAnalyzerTests
     {
         [Theory]
         [InlineData(typeof(ArrayTrie))]
@@ -62,7 +62,24 @@ namespace MimeDetective.Tests.Analyzers
             Assert.NotNull(analyzer);
             Assert.Throws<ArgumentNullException>(() => type.EnumerableCtor(null));
 
+            IFileAnalyzer emptyAnalyzer = type.EnumerableCtor(Enumerable.Empty<FileType>());
+            Assert.NotNull(emptyAnalyzer);
+
             analyzer.Insert(MimeTypes.WORD);
+        }
+
+        [Theory]
+        [InlineData(typeof(ArrayTrie))]
+        [InlineData(typeof(HybridTrie))]
+        [InlineData(typeof(DictionaryTrie))]
+        [InlineData(typeof(LinearCounting))]
+        public void EnumerableCtorDoesNotThrowIfSequenceContainsNull(Type type)
+        {
+            FileType[] types = new FileType[] { MimeTypes.ELF, null, MimeTypes.DLL_EXE };
+
+            IFileAnalyzer analyzer = type.EnumerableCtor(types);
+
+            Assert.NotNull(analyzer);
         }
 
         [Theory]
@@ -159,6 +176,7 @@ namespace MimeDetective.Tests.Analyzers
         public async Task Search(Type analyzerType, string path, string ext)
         {
             var analyzer = analyzerType.EnumerableCtor(MimeTypes.Types);
+            IEnumerable<FileType> expectedTypes = MimeTypes.Types.Where(x => x.Extension.Contains(ext));
             FileInfo file = new FileInfo(path);
             FileType type = null;
 
@@ -169,6 +187,7 @@ namespace MimeDetective.Tests.Analyzers
 
             Assert.NotNull(type);
             Assert.Contains(ext, type.Extension);
+            Assert.Contains(type, expectedTypes);
         }
 
         [Theory]
@@ -274,16 +293,6 @@ namespace MimeDetective.Tests.Analyzers
                 Assert.Same(fileTypes[i], result);
                 Assert.Equal(i, result.HeaderOffset);
             }
-        }
-
-        [Theory]
-        [InlineData(typeof(ArrayTrie))]
-        [InlineData(typeof(HybridTrie))]
-        [InlineData(typeof(DictionaryTrie))]
-        [InlineData(typeof(LinearCounting))]
-        public void InsertDoesNotThrowIfSequenceContainsNull(Type type)
-        {
-            Assert.NotNull(null);
         }
 
         [Theory]
