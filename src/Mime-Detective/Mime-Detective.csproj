@@ -20,7 +20,8 @@
 	<FileVersion>0.0.6.0</FileVersion>
 	<PackageReleaseNotes>See beta3 PR</PackageReleaseNotes>
 	<Version>0.0.6.0-beta3</Version>
-	<DisableImplicitFrameworkReferences>true</DisableImplicitFrameworkReferences>
+	<DisableImplicitFrameworkReferences>false</DisableImplicitFrameworkReferences>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
 
   <ItemGroup Condition="'$(TargetFramework)' == 'net45'">
