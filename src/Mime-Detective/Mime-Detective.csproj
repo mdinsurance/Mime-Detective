@@ -18,10 +18,9 @@
 	</PackageTargetFallback>
 	<AssemblyVersion>0.0.6.0</AssemblyVersion>
 	<FileVersion>0.0.6.0</FileVersion>
-	<PackageReleaseNotes>See beta3 PR</PackageReleaseNotes>
-	<Version>0.0.6.0-beta3</Version>
-	<DisableImplicitFrameworkReferences>false</DisableImplicitFrameworkReferences>
-    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+	<PackageReleaseNotes>See beta4 PR</PackageReleaseNotes>
+	<Version>0.0.6.0-beta4</Version>
+	<DisableImplicitFrameworkReferences>true</DisableImplicitFrameworkReferences>
   </PropertyGroup>
 
   <ItemGroup Condition="'$(TargetFramework)' == 'net45'">
@@ -29,23 +28,19 @@
 	<Reference Include="Microsoft.CSharp" />
 	<Reference Include="System.IO" />
 	<Reference Include="System.IO.Compression" />
-	<Reference Include="System.Linq" />
 	<Reference Include="System.Core" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFramework)' == 'netstandard1.3'">
 	<PackageReference Include="System.Collections" Version="4.3.0" />
-	<PackageReference Include="System.Linq" Version="4.3.0" />
 	<PackageReference Include="System.IO" Version="4.3.0" />
 	<PackageReference Include="System.IO.FileSystem" Version="4.3.0" />
 	<PackageReference Include="System.IO.Compression" Version="4.3.0" />
-	<PackageReference Include="System.Runtime.Extensions" Version="4.3.0" />
 	<PackageReference Include="System.Runtime.InteropServices" Version="4.3.0" />
   </ItemGroup>
 
   <ItemGroup>
-	<PackageReference Include="System.Buffers" Version="4.4.0" />
-	<PackageReference Include="System.Xml.XmlSerializer" Version="4.3.0" />
+	<PackageReference Include="System.Buffers" Version="4.*" />
   </ItemGroup>
 
 </Project>

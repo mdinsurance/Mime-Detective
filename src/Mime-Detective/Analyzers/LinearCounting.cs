@@ -6,14 +6,14 @@ namespace MimeDetective.Analyzers
 {
     public class LinearCounting : IFileAnalyzer
     {
-        private readonly List<FileType> types;
+        private FileType[] types = new FileType[10];
+        private int typesLength = 0;
 
         /// <summary>
         /// Constructs an empty LinearCountingAnalyzer, use <see cref="Insert(FileType)"/> to add file types
         /// </summary>
         public LinearCounting()
         {
-            types = new List<FileType>();
         }
 
         /// <summary>
@@ -24,8 +24,6 @@ namespace MimeDetective.Analyzers
         {
             if (fileTypes is null)
                 ThrowHelpers.FileTypeEnumerableIsNull();
-
-            types = new List<FileType>();
 
             foreach (var fileType in fileTypes)
             {
@@ -39,7 +37,16 @@ namespace MimeDetective.Analyzers
             if (fileType is null)
                 ThrowHelpers.FileTypeArgumentIsNull();
 
-            types.Add(fileType);
+            if (typesLength >= types.Length)
+            {
+                int newTypesCount = types.Length * 2 + 1;
+                var newTypes = new FileType[newTypesCount];
+                Array.Copy(types, newTypes, typesLength);
+                types = newTypes;
+            }
+
+            types[typesLength] = fileType;
+            typesLength++;
         }
 
         public FileType Search(in ReadResult readResult)
@@ -51,7 +58,7 @@ namespace MimeDetective.Analyzers
             FileType highestMatchingType = null;
 
             // compare the file header to the stored file headers
-            for (int typeIndex = 0; typeIndex < types.Count; typeIndex++)
+            for (int typeIndex = 0; typeIndex < typesLength; typeIndex++)
             {
                 FileType type = types[typeIndex];
 
