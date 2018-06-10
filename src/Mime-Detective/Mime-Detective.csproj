@@ -21,7 +21,7 @@
 	<PackageReleaseNotes>See beta4 PR</PackageReleaseNotes>
 	<Version>0.0.6.0-beta4</Version>
 	<DisableImplicitFrameworkReferences>true</DisableImplicitFrameworkReferences>
-    <!--Needed to allow usage fixed sized buffers-->
+    <!--Needed to allow usage of fixed sized buffers-->
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
 

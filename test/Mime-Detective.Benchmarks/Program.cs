@@ -50,7 +50,7 @@ namespace MimeDetective.Benchmarks
     }
 
     [Config(typeof(MyConfig)), MemoryDiagnoser]
-    public class TypeLookup
+    public class Benchmarks
     {
         static readonly byte[][] files = new byte[][]
         {
@@ -84,13 +84,13 @@ namespace MimeDetective.Benchmarks
         }
 
         [Benchmark]
-        public LinearCounting LinearCountingAnalyzerInsertAll()
+        public LinearCounting LinearCountingInsertAll()
         {
             return new LinearCounting(MimeTypes.Types);
         }
 
         [Benchmark]
-        public LinearTrie LinearTrieAnalyzerInsertAll()
+        public LinearTrie LinearTrieInsertAll()
         {
             return new LinearTrie(MimeTypes.Types);
         }
@@ -114,7 +114,7 @@ namespace MimeDetective.Benchmarks
         }
 
         [Benchmark(OperationsPerInvoke = OpsPerInvoke)]
-        public FileType LinearCountingAnalyzerSearch()
+        public FileType LinearCountingSearch()
         {
             FileType result = null;
             foreach (var array in files)
@@ -128,7 +128,7 @@ namespace MimeDetective.Benchmarks
         }
 
         [Benchmark(OperationsPerInvoke = OpsPerInvoke)]
-        public FileType LinearTrieAnalyzerSearch()
+        public FileType LinearTrieSearch()
         {
             FileType result = null;
             foreach (var array in files)
@@ -179,7 +179,7 @@ namespace MimeDetective.Benchmarks
             {
                 using (ReadResult readResult = new ReadResult(array, MimeTypes.MaxHeaderSize))
                 {
-                    result = TypeLookup.array.Search(in readResult);
+                    result = Benchmarks.array.Search(in readResult);
                 }
             }
             return result;
@@ -190,7 +190,7 @@ namespace MimeDetective.Benchmarks
     {
         public static void Main(string[] args)
         {
-            var summary = BenchmarkRunner.Run<TypeLookup>(); 
+            var summary = BenchmarkRunner.Run<Benchmarks>(); 
         }
     }
 }
