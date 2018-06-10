@@ -35,6 +35,7 @@ namespace MimeDetective.Tests.Analyzers
     public class TrieAnalyzerTests
     {
         [Theory]
+        [InlineData(typeof(LinearTrie))]
         [InlineData(typeof(ArrayTrie))]
         [InlineData(typeof(HybridTrie))]
         [InlineData(typeof(DictionaryTrie))]
@@ -50,6 +51,7 @@ namespace MimeDetective.Tests.Analyzers
         }
 
         [Theory]
+        [InlineData(typeof(LinearTrie))]
         [InlineData(typeof(ArrayTrie))]
         [InlineData(typeof(HybridTrie))]
         [InlineData(typeof(DictionaryTrie))]
@@ -69,6 +71,7 @@ namespace MimeDetective.Tests.Analyzers
         }
 
         [Theory]
+        [InlineData(typeof(LinearTrie))]
         [InlineData(typeof(ArrayTrie))]
         [InlineData(typeof(HybridTrie))]
         [InlineData(typeof(DictionaryTrie))]
@@ -83,6 +86,7 @@ namespace MimeDetective.Tests.Analyzers
         }
 
         [Theory]
+        [InlineData(typeof(LinearTrie))]
         [InlineData(typeof(ArrayTrie))]
         [InlineData(typeof(HybridTrie))]
         [InlineData(typeof(DictionaryTrie))]
@@ -98,6 +102,25 @@ namespace MimeDetective.Tests.Analyzers
             }
 
             analyzer.Insert(MimeTypes.WORD);
+        }
+
+        [Theory]
+        [InlineData("./Data/images/test.ico", "ico")]
+        public async Task SearchLinear(string path, string ext)
+        {
+            var analyzer = new LinearTrie();
+            analyzer.Insert(MimeTypes.ICO);
+
+            FileInfo file = new FileInfo(path);
+            FileType type = null;
+
+            using (ReadResult result = await ReadResult.ReadFileHeaderAsync(file))
+            {
+                type = analyzer.Search(in result);
+            }
+
+            Assert.NotNull(type);
+            Assert.Contains(ext, type.Extension);
         }
 
         [Theory]
@@ -173,6 +196,24 @@ namespace MimeDetective.Tests.Analyzers
         [InlineData(typeof(LinearCounting), "./Data/Audio/mp3ID3Test2.mp3", "mp3")]
         [InlineData(typeof(LinearCounting), "./Data/Assemblies/ManagedExe.exe", "exe")]
         [InlineData(typeof(LinearCounting), "./Data/Assemblies/ManagedDLL.dll", "dll")]
+        [InlineData(typeof(LinearTrie), "./Data/Documents/XlsExcel2016.xls", "xls")]
+        [InlineData(typeof(LinearTrie), "./Data/Documents/PptPowerpoint2016.ppt", "ppt")]
+        [InlineData(typeof(LinearTrie), "./Data/Documents/DocWord2016.doc", "doc")]
+        [InlineData(typeof(LinearTrie), "./Data/Documents/PdfWord2016.pdf", "pdf")]
+        [InlineData(typeof(LinearTrie), "./Data/Zip/empty.zip", "zip")]
+        [InlineData(typeof(LinearTrie), "./Data/Zip/images.zip", "zip")]
+        [InlineData(typeof(LinearTrie), "./Data/Zip/imagesBy7zip.zip", "zip")]
+        [InlineData(typeof(LinearTrie), "./Data/images/test.gif", "gif")]
+        [InlineData(typeof(LinearTrie), "./Data/images/test.jpg", "jpg")]
+        [InlineData(typeof(LinearTrie), "./Data/images/test.ico", "ico")]
+        [InlineData(typeof(LinearTrie), "./Data/images/test.png", "png")]
+        [InlineData(typeof(LinearTrie), "./Data/images/test.bmp", "bmp")]
+        [InlineData(typeof(LinearTrie), "./Data/Audio/wavVLC.wav", "wav")]
+        [InlineData(typeof(LinearTrie), "./Data/Audio/flacVLC.flac", "flac")]
+        [InlineData(typeof(LinearTrie), "./Data/Audio/mp3ID3Test1.mp3", "mp3")]
+        [InlineData(typeof(LinearTrie), "./Data/Audio/mp3ID3Test2.mp3", "mp3")]
+        [InlineData(typeof(LinearTrie), "./Data/Assemblies/ManagedExe.exe", "exe")]
+        [InlineData(typeof(LinearTrie), "./Data/Assemblies/ManagedDLL.dll", "dll")]
         public async Task Search(Type analyzerType, string path, string ext)
         {
             var analyzer = analyzerType.EnumerableCtor(MimeTypes.Types);
@@ -191,6 +232,7 @@ namespace MimeDetective.Tests.Analyzers
         }
 
         [Theory]
+        [InlineData(typeof(LinearTrie))]
         [InlineData(typeof(ArrayTrie))]
         [InlineData(typeof(HybridTrie))]
         [InlineData(typeof(DictionaryTrie))]
@@ -208,6 +250,7 @@ namespace MimeDetective.Tests.Analyzers
         }
 
         [Theory]
+        [InlineData(typeof(LinearTrie))]
         [InlineData(typeof(ArrayTrie))]
         [InlineData(typeof(HybridTrie))]
         [InlineData(typeof(DictionaryTrie))]
@@ -225,6 +268,7 @@ namespace MimeDetective.Tests.Analyzers
         }
 
         [Theory]
+        [InlineData(typeof(LinearTrie))]
         [InlineData(typeof(ArrayTrie))]
         [InlineData(typeof(HybridTrie))]
         [InlineData(typeof(DictionaryTrie))]
@@ -242,6 +286,7 @@ namespace MimeDetective.Tests.Analyzers
         }
 
         [Theory]
+        [InlineData(typeof(LinearTrie))]
         [InlineData(typeof(ArrayTrie))]
         [InlineData(typeof(HybridTrie))]
         [InlineData(typeof(DictionaryTrie))]
@@ -267,6 +312,7 @@ namespace MimeDetective.Tests.Analyzers
         }
 
         [Theory]
+        [InlineData(typeof(LinearTrie))]
         [InlineData(typeof(ArrayTrie))]
         [InlineData(typeof(HybridTrie))]
         [InlineData(typeof(DictionaryTrie))]
@@ -296,6 +342,7 @@ namespace MimeDetective.Tests.Analyzers
         }
 
         [Theory]
+        [InlineData(typeof(LinearTrie))]
         [InlineData(typeof(ArrayTrie))]
         [InlineData(typeof(HybridTrie))]
         [InlineData(typeof(DictionaryTrie))]
@@ -332,6 +379,7 @@ namespace MimeDetective.Tests.Analyzers
         }
 
         [Theory]
+        [InlineData(typeof(LinearTrie))]
         [InlineData(typeof(ArrayTrie))]
         [InlineData(typeof(HybridTrie))]
         [InlineData(typeof(DictionaryTrie))]

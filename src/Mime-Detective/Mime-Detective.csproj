@@ -21,6 +21,8 @@
 	<PackageReleaseNotes>See beta4 PR</PackageReleaseNotes>
 	<Version>0.0.6.0-beta4</Version>
 	<DisableImplicitFrameworkReferences>true</DisableImplicitFrameworkReferences>
+    <!--Needed to allow usage fixed sized buffers-->
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
 
   <ItemGroup Condition="'$(TargetFramework)' == 'net45'">
@@ -34,6 +36,7 @@
   <ItemGroup Condition="'$(TargetFramework)' == 'netstandard1.3'">
 	<PackageReference Include="System.Collections" Version="4.3.0" />
 	<PackageReference Include="System.IO" Version="4.3.0" />
+    <PackageReference Include="System.Linq" Version="4.3.0" />
 	<PackageReference Include="System.IO.FileSystem" Version="4.3.0" />
 	<PackageReference Include="System.IO.Compression" Version="4.3.0" />
 	<PackageReference Include="System.Runtime.InteropServices" Version="4.3.0" />

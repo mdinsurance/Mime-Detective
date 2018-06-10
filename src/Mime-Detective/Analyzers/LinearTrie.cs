@@ -1,8 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Runtime.InteropServices;
 
 namespace MimeDetective.Analyzers
 {
+    //this is somehow off by one in the insert...
+    //on the single insert search test
+    //record is inserted on the 3rd node, when it should be on teh second
     public sealed class LinearTrie : IFileAnalyzer
     {
         private const int NullStandInValue = 256;
@@ -10,6 +14,32 @@ namespace MimeDetective.Analyzers
 
         private OffsetNode[] OffsetNodes = new OffsetNode[10];
         private int offsetNodesLength = 1;
+
+        [StructLayout(LayoutKind.Auto)]
+        private struct OffsetNode
+        {
+            public ushort Offset;
+            public int TrieLength;
+            public Node[] Trie;
+
+            public OffsetNode(ushort offset)
+            {
+                Offset = offset;
+                //this is the issue resizing this is dropping the reference in the insert and search algs
+                Trie = new Node[64];
+                TrieLength = 1;
+            }
+        }
+
+        //if we do an offset here we could cut this in half
+        [StructLayout(LayoutKind.Auto)]
+        private unsafe struct Node
+        {
+            //if complete node then this not null
+            public FileType Record;
+
+            public fixed ushort Children[MaxNodeSize];
+        }
 
         /// <summary>
         /// Constructs an empty ArrayBasedTrie, <see cref="Insert(FileType)"/> to add definitions
@@ -43,30 +73,28 @@ namespace MimeDetective.Analyzers
             FileType match = null;
             int highestMatchingCount = 0;
 
-            /*
             //iterate through offset nodes
             for (int offsetNodeIndex = 0; offsetNodeIndex < offsetNodesLength; offsetNodeIndex++)
             {
                 ref OffsetNode offsetNode = ref OffsetNodes[offsetNodeIndex];
+                ref Node node = ref offsetNode.Trie[0];
                 int i = offsetNode.Offset;
-                int triePos = offsetNode.Children[i] - 1;
 
-           
-
+                //todo currently loops longer than it should
                 while (i < readResult.ReadLength)
                 {
-                    int currentVal = readResult.Array[i];
-                    Node node = prevNode[currentVal];
+                    int arrayPos = readResult.Array[i];
+                    int triePos = node.Children[arrayPos];
 
-                    if (node.Children == null)
+                    if (triePos <= 0)
                     {
-                        node = prevNode[NullStandInValue];
+                        triePos = node.Children[NullStandInValue];
 
-                        if (node.Children is null)
+                        if (triePos <= 0)
                             break;
                     }
 
-                    //increment here
+                    node = ref offsetNode.Trie[triePos];
                     i++;
 
                     //collect the record
@@ -75,11 +103,9 @@ namespace MimeDetective.Analyzers
                         match = node.Record;
                         highestMatchingCount = i;
                     }
-
-                    prevNode = node.Children;
                 }
             }
-            */
+            
             return match;
         }
 
@@ -93,7 +119,7 @@ namespace MimeDetective.Analyzers
 
             for (int offsetNodeIndex = 0; offsetNodeIndex < offsetNodesLength; offsetNodeIndex++)
             {
-                ref var currentNode = ref OffsetNodes[offsetNodeIndex];
+                ref OffsetNode currentNode = ref OffsetNodes[offsetNodeIndex];
 
                 if (currentNode.Offset == type.HeaderOffset)
                 {
@@ -103,83 +129,55 @@ namespace MimeDetective.Analyzers
                 }
             }
 
-            //handle offset array resize
+            //handle adding new offsetNode and offsetNOde array resize
             if (!matchFound)
             {
-                int newNodePos = offsetNodesLength;
-
-                if (newNodePos >= OffsetNodes.Length)
+                if (offsetNodesLength >= OffsetNodes.Length)
                 {
-                    int newOffsetNodeCount = OffsetNodes.Length * 2 + 1;
+                    //TODO put max size check
+                    int newOffsetNodeCount = OffsetNodes.Length * 2;
                     var newOffsetNodes = new OffsetNode[newOffsetNodeCount];
                     Array.Copy(OffsetNodes, newOffsetNodes, offsetNodesLength);
                     OffsetNodes = newOffsetNodes;
                 }
 
-                offsetNode = ref OffsetNodes[newNodePos];
+                offsetNode = ref OffsetNodes[offsetNodesLength];
                 offsetNode = new OffsetNode(type.HeaderOffset);
                 offsetNodesLength++;
             }
 
+            //setup variables for walking the trie
             int i = 0;
-            Node[] trie = offsetNode.Trie;
-            ref Node node = ref trie[0];
-            int childArrayPos = type.Header[i] ?? NullStandInValue;
-            int triePos = offsetNode.Children[childArrayPos] - 1;
+            ref Node node = ref offsetNode.Trie[0];
 
-            for (; i < type.Header.Length;)
+            while (i < type.Header.Length)
             {
+                int arrayPos = type.Header[i] ?? NullStandInValue;
+                int triePos = node.Children[arrayPos];
+
                 //insert new node, handle possible resize
-                if (triePos < 0)
+                if (triePos <= 0)
                 {
-                    int newTriePos = offsetNode.TrieLength;
-                    if (newTriePos >= OffsetNodes.Length)
+                    triePos = offsetNode.TrieLength;
+                    node.Children[arrayPos] = (ushort)triePos;
+
+                    if (offsetNode.TrieLength >= offsetNode.Trie.Length)
                     {
-                        int newTrieNodeCount = offsetNode.Trie.Length * 2 + 1;
+                        //TODO put max size check
+                        int newTrieNodeCount = offsetNode.Trie.Length * 2;
                         var newTrieNodes = new Node[newTrieNodeCount];
-                        Array.Copy(trie, newTrieNodes, newTriePos);
-                        offsetNode.Trie = trie = newTrieNodes;
+                        Array.Copy(offsetNode.Trie, newTrieNodes, offsetNode.TrieLength);
+                        offsetNode.Trie = newTrieNodes;
                     }
 
-                    node = ref trie[newTriePos];
-                    offsetNode.Children[childArrayPos] = newTriePos;
                     offsetNode.TrieLength++;
                 }
-                else
-                {
-                    node = ref trie[triePos];
-                }
 
+                node = ref offsetNode.Trie[triePos];
                 i++;
-
-                childArrayPos = type.Header[i] ?? NullStandInValue;
-                triePos = node.Children[childArrayPos] - 1;
             }
 
             node.Record = type;
-        }
-
-        private unsafe struct OffsetNode
-        {
-            public ushort Offset;
-            public int TrieLength;
-            public Node[] Trie;
-            public fixed int Children[257];
-
-            public OffsetNode(ushort offset)
-            {
-                Offset = offset;
-                Trie = new Node[MaxNodeSize];
-                TrieLength = 0;
-            }
-        }
-
-        private unsafe struct Node
-        {
-            //if complete node then this not null
-            public FileType Record;
-
-            public fixed int Children[257];
         }
     }
 }

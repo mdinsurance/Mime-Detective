@@ -127,17 +127,16 @@ namespace MimeDetective.Analyzers
             //handle expanding collection
             if (!matchFound)
             {
-                int newNodePos = offsetNodesLength;
-
-                if (newNodePos >= OffsetNodes.Length)
+                if (offsetNodesLength >= OffsetNodes.Length)
                 {
-                    int newOffsetNodeCount = OffsetNodes.Length * 2 + 1;
+                    int newOffsetNodeCalc = OffsetNodes.Length * 2;
+                    int newOffsetNodeCount = newOffsetNodeCalc > 560 ? 560 : newOffsetNodeCalc;
                     var newOffsetNodes = new OffsetNode[newOffsetNodeCount];
                     Array.Copy(OffsetNodes, newOffsetNodes, offsetNodesLength);
                     OffsetNodes = newOffsetNodes;
                 }
 
-                match = ref OffsetNodes[newNodePos];
+                match = ref OffsetNodes[offsetNodesLength];
                 match = new OffsetNode(type.HeaderOffset);
                 offsetNodesLength++;
             }

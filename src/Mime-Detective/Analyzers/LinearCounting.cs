@@ -1,12 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Linq;
 
 namespace MimeDetective.Analyzers
 {
     public class LinearCounting : IFileAnalyzer
     {
-        private FileType[] types = new FileType[10];
+        private FileType[] types = new FileType[20];
         private int typesLength = 0;
 
         /// <summary>
@@ -30,6 +31,11 @@ namespace MimeDetective.Analyzers
                 if ((object)fileType != null)
                     Insert(fileType);
             }
+
+            //types.OrderBy(x => x.HeaderOffset);
+            //todo sort
+            //Array.Sort<FileType>(types, (x,y) => x.HeaderOffset.CompareTo(y.HeaderOffset));
+            //types = types;
         }
 
         public void Insert(FileType fileType)
@@ -39,7 +45,7 @@ namespace MimeDetective.Analyzers
 
             if (typesLength >= types.Length)
             {
-                int newTypesCount = types.Length * 2 + 1;
+                int newTypesCount = types.Length * 2;
                 var newTypes = new FileType[newTypesCount];
                 Array.Copy(types, newTypes, typesLength);
                 types = newTypes;
@@ -51,9 +57,6 @@ namespace MimeDetective.Analyzers
 
         public FileType Search(in ReadResult readResult)
         {
-            if (readResult.ReadLength == 0)
-                return null;
-
             uint highestMatchingCount = 0;
             FileType highestMatchingType = null;
 
@@ -61,18 +64,14 @@ namespace MimeDetective.Analyzers
             for (int typeIndex = 0; typeIndex < typesLength; typeIndex++)
             {
                 FileType type = types[typeIndex];
-
                 uint matchingCount = 0;
-                int iOffset = type.HeaderOffset;
-                int readEnd = iOffset + type.Header.Length;
 
-                if (readEnd > readResult.ReadLength)
-                    continue;
-
-                for (int i = 0; iOffset < readEnd; i++, iOffset++)
+                for (int i = 0, iOffset = type.HeaderOffset; iOffset < readResult.ReadLength && i < type.Header.Length; i++, iOffset++)
                 {
                     if (type.Header[i] is null || type.Header[i].Value == readResult.Array[iOffset])
                         matchingCount++;
+                    else
+                        break;
                 }
 
                 //TODO should this be default behavior?

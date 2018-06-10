@@ -32,12 +32,14 @@ namespace MimeDetective.Benchmarks
                 .With(Platform.X64)
                 .With(Jit.RyuJit)
                 .WithId("NetCore1.1"));*/
-
+            
+            /*
             Add(Job.Default.With(Runtime.Core)
                 .With(CsProjCoreToolchain.NetCoreApp20)
                 .With(Platform.X64)
                 .With(Jit.RyuJit)
                 .WithId("NetCore2.0"));
+            */
 
             Add(Job.Default.With(Runtime.Core)
                 .With(CsProjCoreToolchain.NetCoreApp21)
@@ -52,19 +54,24 @@ namespace MimeDetective.Benchmarks
     {
         static readonly byte[][] files = new byte[][]
         {
+            ReadFile(new FileInfo("./data/Assemblies/ManagedDLL.dll")),
+            ReadFile(new FileInfo("./data/Assemblies/ManagedExe.exe")),
+            ReadFile(new FileInfo("./data/Images/test.png")),
             ReadFile(new FileInfo("./data/Images/test.jpg")),
             ReadFile(new FileInfo("./data/Images/test.gif")),
             ReadFile(new FileInfo("./data/Documents/DocWord2016.doc")),
             ReadFile(new FileInfo("./data/Zip/Images.zip")),
             ReadFile(new FileInfo("./data/Assemblies/NativeExe.exe")),
-            ReadFile(new FileInfo("./data/Audio/wavVLC.wav"))
+            ReadFile(new FileInfo("./data/Audio/wavVLC.wav")),
+            ReadFile(new FileInfo("./data/Documents/PdfWord2016.pdf"))
         };
 
-        const int OpsPerInvoke = 6;
+        const int OpsPerInvoke = 10;
         static readonly LinearCounting linear = new LinearCounting(MimeTypes.Types);
         static readonly DictionaryTrie dict = new DictionaryTrie(MimeTypes.Types);
         static readonly HybridTrie hybrid = new HybridTrie(MimeTypes.Types);
         static readonly ArrayTrie array = new ArrayTrie(MimeTypes.Types);
+        static readonly LinearTrie linearTrie = new LinearTrie(MimeTypes.Types);
 
         static byte[] ReadFile(FileInfo info)
         {
@@ -80,6 +87,12 @@ namespace MimeDetective.Benchmarks
         public LinearCounting LinearCountingAnalyzerInsertAll()
         {
             return new LinearCounting(MimeTypes.Types);
+        }
+
+        [Benchmark]
+        public LinearTrie LinearTrieAnalyzerInsertAll()
+        {
+            return new LinearTrie(MimeTypes.Types);
         }
 
         [Benchmark]
@@ -109,6 +122,20 @@ namespace MimeDetective.Benchmarks
                 using (ReadResult readResult = new ReadResult(array, MimeTypes.MaxHeaderSize))
                 {
                     result = linear.Search(in readResult);
+                }
+            }
+            return result;
+        }
+
+        [Benchmark(OperationsPerInvoke = OpsPerInvoke)]
+        public FileType LinearTrieAnalyzerSearch()
+        {
+            FileType result = null;
+            foreach (var array in files)
+            {
+                using (ReadResult readResult = new ReadResult(array, MimeTypes.MaxHeaderSize))
+                {
+                    result = linearTrie.Search(in readResult);
                 }
             }
             return result;

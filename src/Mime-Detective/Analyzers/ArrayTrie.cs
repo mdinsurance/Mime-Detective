@@ -55,7 +55,7 @@ namespace MimeDetective.Analyzers
                     int currentVal = readResult.Array[i];
                     Node node = prevNode[currentVal];
 
-                    if (node.Children == null)
+                    if (node.Children is null)
                     {
                         node = prevNode[NullStandInValue];
 
@@ -104,7 +104,8 @@ namespace MimeDetective.Analyzers
             {
                 if (offsetNodesLength >= OffsetNodes.Length)
                 {
-                    int newOffsetNodeCalc = OffsetNodes.Length * 2 + 1;
+                    //TODO put max size check
+                    int newOffsetNodeCalc = OffsetNodes.Length * 2;
                     int newOffsetNodeCount = newOffsetNodeCalc > 560 ? 560 : newOffsetNodeCalc;
                     var newOffsetNodes = new OffsetNode[newOffsetNodeCount];
                     Array.Copy(OffsetNodes, newOffsetNodes, offsetNodesLength);
@@ -120,11 +121,10 @@ namespace MimeDetective.Analyzers
 
             for (int i = 0; i < type.Header.Length; i++)
             {
-                byte? value = type.Header[i];
-                int arrayPos = value ?? NullStandInValue;
+                int arrayPos = type.Header[i] ?? NullStandInValue;
                 ref Node node = ref prevNode[arrayPos];
 
-                //TODO maybe short ciruit it
+                //TODO maybe short circuit it
                 if (i == type.Header.Length - 1)
                     node.Record = type;
 
