@@ -59,7 +59,17 @@ namespace MimeDetective
         public readonly static FileType MS_OFFICE = new FileType(new byte?[] { 0xD0, 0xCF, 0x11, 0xE0, 0xA1, 0xB1, 0x1A, 0xE1 }, "doc,ppt,xls", "application/octet-stream");
 
         //application/xml text/xml
-        public readonly static FileType XML = new FileType(new byte?[] { 0x72, 0x73, 0x69, 0x6F, 0x6E, 0x3D, 0x22, 0x31, 0x2E, 0x30, 0x22, 0x3F, 0x3E }, "xml,xul", "text/xml");
+        //                                                               r     s     i     o     n     =     "     1     .     0     "     ?     >
+        public readonly static FileType XML = new FileType(new byte?[] { 0x72, 0x73, 0x69, 0x6F, 0x6E, 0x3D, 0x22, 0x31, 0x2E, 0x30, 0x22, 0x3F, 0x3E }, "xml", "text/xml");
+
+        // XML file encoded with UTF-8                                    <     ?     x     m     l     (spc)
+        public readonly static FileType XML_NoBom = new FileType(new byte?[] { 0x3C, 0x3F, 0x78, 0x6D, 0x6C, 0x20, }, "xml", "application/xml");
+        // XML file encoded with UTF-8 + Byte order mark                         Byte Order Mark    <     ?     x     m     l     (spc)
+        public readonly static FileType XML_Utf8Bom = new FileType(new byte?[] { 0x0EF, 0xBB, 0xBF, 0x3C, 0x3F, 0x78, 0x6D, 0x6C, 0x20, }, "xml", "application/xml");
+        // XML file encoded with UCS-2 Big Endian                               BOM FEFF     <           ?           x           m           l           (spc)
+        public readonly static FileType XML_UCS2BE = new FileType(new byte?[] { 0x0FF, 0xFE, 0x3C, 0x00, 0x3F, 0x00, 0x78, 0x00, 0x6D, 0x00, 0x6C, 0x00, 0x20, 0x00, }, "xml", "application/xml");
+        // XML file encoded with UCS-2 Little Endian                            BOM FFFE     <           ?           x           m           l           (spc)
+        public readonly static FileType XML_UCS2LE = new FileType(new byte?[] { 0x0FE, 0xFF, 0x00, 0x3C, 0x00, 0x3F, 0x00, 0x78, 0x00, 0x6D, 0x00, 0x6C, 0x00, 0x20, }, "xml", "application/xml");
 
         //text files
         public readonly static FileType TXT = new FileType(EmptyHeader, "txt", "text/plain");
@@ -152,6 +162,7 @@ namespace MimeDetective
         public readonly static FileType ZIP_7z = new FileType(new byte?[] { 0x37, 0x7A, 0xBC, 0xAF, 0x27, 0x1C }, "7z", "application/x-compressed");
 
         public readonly static FileType ZIP = new FileType(new byte?[] { 0x50, 0x4B, 0x03, 0x04 }, "zip", "application/x-compressed");
+        public readonly static FileType ZIP_EMPTY = new FileType(new byte?[] { 0x50, 0x4B, 0x05, 0x06 }, "zip", "application/x-compressed");
         public readonly static FileType RAR = new FileType(new byte?[] { 0x52, 0x61, 0x72, 0x21 }, "rar", "application/x-compressed");
         public readonly static FileType DLL_EXE = new FileType(new byte?[] { 0x4D, 0x5A }, "dll,exe", "application/octet-stream");
 
@@ -212,8 +223,8 @@ namespace MimeDetective
         //EVTX	 	Windows Vista event log file
         public readonly static FileType ELF = new FileType(new byte?[] { 0x45, 0x6C, 0x66, 0x46, 0x69, 0x6C, 0x65, 0x00 }, "elf", "text/plain");
 
-        public static readonly FileType[] Types = new FileType[] { PDF, JPEG, ZIP, RAR, RTF, PNG, GIF, DLL_EXE, MS_OFFICE,
-                BMP, DLL_EXE, ZIP_7z, GZ_TGZ, TAR_ZH, TAR_ZV, OGG, ICO, XML, DWG, LIB_COFF, PST, PSD, BZ2,
+        public static readonly FileType[] Types = new FileType[] { PDF, JPEG, ZIP, ZIP_EMPTY, RAR, RTF, PNG, GIF, DLL_EXE, MS_OFFICE,
+                BMP, DLL_EXE, ZIP_7z, GZ_TGZ, TAR_ZH, TAR_ZV, OGG, ICO, XML, XML_NoBom, XML_Utf8Bom, XML_UCS2BE, XML_UCS2LE, DWG, LIB_COFF, PST, PSD, BZ2,
                 AES, SKR, SKR_2, PKR, EML_FROM, ELF, TXT_UTF8, TXT_UTF16_BE, TXT_UTF16_LE, TXT_UTF32_BE, TXT_UTF32_LE,
                 Mp3ID3, Wav, Flac, MIDI,
                 Tiff, TiffLittleEndian, TiffBigEndian, TiffBig,
