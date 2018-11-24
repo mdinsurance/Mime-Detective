@@ -94,10 +94,12 @@ namespace MimeDetective
         }
 
         /// <summary>
-        /// Checks if the file is executable
+        /// Checks if the file is executable file .exe
         /// </summary>
         /// <param name="fileInfo"></param>
-        /// <returns></returns>
+        /// <returns>
+        ///     <c>true</c> if the specified file is type; otherwise, <c>false</c>.
+        /// </returns>
         public static bool IsExe(this FileInfo fileInfo) => fileInfo.IsType(MimeTypes.DLL_EXE);
 
         /// <summary>
@@ -107,7 +109,9 @@ namespace MimeDetective
         /// But it could be MSWord or MSExcel, or Powerpoint...
         /// </summary>
         /// <param name="fileInfo"></param>
-        /// <returns></returns>
+        /// <returns>
+        ///     <c>true</c> if the specified file is type; otherwise, <c>false</c>.
+        /// </returns>
         public static bool IsMsi(this FileInfo fileInfo)
         {
             // MSI has a generic DOCFILE header. Also it matches PPT files

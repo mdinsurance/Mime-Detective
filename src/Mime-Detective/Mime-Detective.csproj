@@ -1,10 +1,10 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-	<Description>Mime-Detective can find the MIME Types of files</Description>
+	<Description>Detect MIME type from files.</Description>
 	<AssemblyTitle>Mime-Detective</AssemblyTitle>
 	<Authors>Joshua Clark</Authors>
-	<TargetFrameworks>netstandard1.3;net45</TargetFrameworks>
+	<TargetFrameworks>netstandard1.3;net45;netstandard2.0</TargetFrameworks>
 	<AssemblyName>Mime-Detective</AssemblyName>
 	<PackageId>Mime-Detective</PackageId>
 	<PackageTags>mime, mime detective, file types</PackageTags>
@@ -13,14 +13,10 @@
 	<PackageLicenseUrl>https://github.com/clarkis117/Mime-Detective/blob/master/LICENSE</PackageLicenseUrl>
 	<RepositoryType>git</RepositoryType>
 	<RepositoryUrl>https://github.com/clarkis117/Mime-Detective.git</RepositoryUrl>
-	<PackageTargetFallback Condition="'$(TargetFramework)' == 'netstandard1.3'">
-	  $(PackageTargetFallback);portable-net45+win8
-	</PackageTargetFallback>
 	<AssemblyVersion>0.0.6.0</AssemblyVersion>
 	<FileVersion>0.0.6.0</FileVersion>
-	<PackageReleaseNotes>See beta4 PR</PackageReleaseNotes>
-	<Version>0.0.6.0-beta4</Version>
-	<DisableImplicitFrameworkReferences>true</DisableImplicitFrameworkReferences>
+	<PackageReleaseNotes>See beta5 PR</PackageReleaseNotes>
+	<Version>0.0.6.0-beta5</Version>
     <!--Needed to allow usage of fixed sized buffers-->
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
@@ -32,16 +28,7 @@
 	<Reference Include="System.IO.Compression" />
 	<Reference Include="System.Core" />
   </ItemGroup>
-
-  <ItemGroup Condition="'$(TargetFramework)' == 'netstandard1.3'">
-	<PackageReference Include="System.Collections" Version="4.3.0" />
-	<PackageReference Include="System.IO" Version="4.3.0" />
-    <PackageReference Include="System.Linq" Version="4.3.0" />
-	<PackageReference Include="System.IO.FileSystem" Version="4.3.0" />
-	<PackageReference Include="System.IO.Compression" Version="4.3.0" />
-	<PackageReference Include="System.Runtime.InteropServices" Version="4.3.0" />
-  </ItemGroup>
-
+        
   <ItemGroup>
 	<PackageReference Include="System.Buffers" Version="4.*" />
   </ItemGroup>

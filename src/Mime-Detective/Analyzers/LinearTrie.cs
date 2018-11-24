@@ -98,7 +98,7 @@ namespace MimeDetective.Analyzers
                     i++;
 
                     //collect the record
-                    if (i > highestMatchingCount && (object)node.Record != null)
+                    if (i > highestMatchingCount && !(node.Record is null))
                     {
                         match = node.Record;
                         highestMatchingCount = i;
