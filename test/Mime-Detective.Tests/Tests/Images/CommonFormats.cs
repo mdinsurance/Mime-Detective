@@ -88,5 +88,20 @@ namespace MimeDetective.Tests.Images
 
             await TypeComparisions.AssertIsType(info, MimeTypes.ICO);
         }
+
+        [Fact]
+        public async Task IsWebp()
+        {
+            var info = new FileInfo(ImagePath + "test.webp");
+
+            //false assertions
+            Assert.False(info.IsPng());
+
+            Assert.False(info.IsGif());
+
+            Assert.False(info.IsJpeg());
+
+            await TypeComparisions.AssertIsType(info, MimeTypes.WEBP);
+        }
     }
 }

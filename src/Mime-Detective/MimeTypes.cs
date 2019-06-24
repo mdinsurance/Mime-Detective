@@ -36,6 +36,9 @@ namespace MimeDetective
         //see source control for old version, def maybe wrong period
         public readonly static FileType PPT = new FileType(new byte?[] { 0xA0, 0x46, 0x1D, 0xF0 }, "ppt", "application/mspowerpoint", 512);
 
+        // MSG (Outlook) file
+        public readonly static FileType MSG = new FileType(new byte?[] { 0x52, 0x00, 0x6F, 0x00, 0x6F, 0x00, 0x74 }, "msg", "application/vnd.ms-outlook", 512);
+
         //ms office and openoffice docs (they're zip files: rename and enjoy!)
         //don't add them to the list, as they will be 'subtypes' of the ZIP type
         //Open Xml Document formats
@@ -49,14 +52,13 @@ namespace MimeDetective
         public readonly static FileType ODP = new FileType(EmptyHeader, "odp", "application/vnd.oasis.opendocument.presentation", 512);
         public readonly static FileType ODG = new FileType(EmptyHeader, "odg", "application/vnd.oasis.opendocument.graphics", 512);
 
-
         // common documents
         public readonly static FileType RTF = new FileType(new byte?[] { 0x7B, 0x5C, 0x72, 0x74, 0x66, 0x31 }, "rtf", "application/rtf");
 
         public readonly static FileType PDF = new FileType(new byte?[] { 0x25, 0x50, 0x44, 0x46 }, "pdf", "application/pdf");
 
         //todo place holder extension
-        public readonly static FileType MS_OFFICE = new FileType(new byte?[] { 0xD0, 0xCF, 0x11, 0xE0, 0xA1, 0xB1, 0x1A, 0xE1 }, "doc,ppt,xls", "application/octet-stream");
+        public readonly static FileType MS_OFFICE = new FileType(new byte?[] { 0xD0, 0xCF, 0x11, 0xE0, 0xA1, 0xB1, 0x1A, 0xE1 }, "doc,ppt,xls,msg", "application/octet-stream");
 
         //application/xml text/xml
         //                                                               r     s     i     o     n     =     "     1     .     0     "     ?     >
@@ -71,6 +73,13 @@ namespace MimeDetective
         // XML file encoded with UCS-2 Little Endian                            BOM FFFE     <           ?           x           m           l           (spc)
         public readonly static FileType XML_UCS2LE = new FileType(new byte?[] { 0x0FE, 0xFF, 0x00, 0x3C, 0x00, 0x3F, 0x00, 0x78, 0x00, 0x6D, 0x00, 0x6C, 0x00, 0x20, }, "xml", "application/xml");
 
+        //text/html
+        //                                                                 <      !     D    O     C     T      Y    P     E    (spc)   h    t     m      l     
+        public readonly static FileType HTML = new FileType(new byte?[] { 0x3C, 0x21, 0x44, 0x4F, 0x43, 0x54, 0x59, 0x50, 0x45, 0x20, 0x68, 0x74, 0x6D, 0x6c }, "html", "text/html");
+
+        // HTMl file encoded wuth UTF-8 + Byte order mark                         Byte Order Mark      <     !     D    O     C     T      Y    P     E    (spc)   h    t     m      l
+        public readonly static FileType HTML_Utf8Bom = new FileType(new byte?[] { 0x0EF, 0xBB, 0xBF, 0x3C, 0x21, 0x44, 0x4F, 0x43, 0x54, 0x59, 0x50, 0x45, 0x20, 0x68, 0x74, 0x6D, 0x6c }, "html", "text/html");
+      
         //text files
         public readonly static FileType TXT = new FileType(EmptyHeader, "txt", "text/plain");
 
@@ -90,6 +99,7 @@ namespace MimeDetective
         public readonly static FileType PNG = new FileType(new byte?[] { 0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A }, "png", "image/png");
         public readonly static FileType GIF = new FileType(new byte?[] { 0x47, 0x49, 0x46, 0x38, null, 0x61 }, "gif", "image/gif");
         public readonly static FileType BMP = new FileType(new byte?[] { 0x42, 0x4D }, "bmp", "image/bmp"); // or image/x-windows-bmp
+        public readonly static FileType WEBP = new FileType(new byte?[] { 0x52, 0x49, 0x46, 0x46, 0x80, 0x0D, 0x00, 0x00, 0x57, 0x45, 0x42, 0x50 }, "webp", "image/webp");
 
         //TODO review this
         public readonly static FileType ICO = new FileType(new byte?[] { 0, 0, 1, 0 }, "ico", "image/x-icon");
@@ -223,9 +233,10 @@ namespace MimeDetective
         //EVTX	 	Windows Vista event log file
         public readonly static FileType ELF = new FileType(new byte?[] { 0x45, 0x6C, 0x66, 0x46, 0x69, 0x6C, 0x65, 0x00 }, "elf", "text/plain");
 
-        public static readonly FileType[] Types = new FileType[] { PDF, JPEG, ZIP, ZIP_EMPTY, RAR, RTF, PNG, GIF, DLL_EXE, MS_OFFICE,
+        public static readonly FileType[] Types = new FileType[] { PDF, JPEG, ZIP, ZIP_EMPTY, RAR, RTF, PNG, GIF, WEBP, DLL_EXE, MS_OFFICE,
                 BMP, DLL_EXE, ZIP_7z, GZ_TGZ, TAR_ZH, TAR_ZV, OGG, ICO, XML, XML_NoBom, XML_Utf8Bom, XML_UCS2BE, XML_UCS2LE, DWG, LIB_COFF, PST, PSD, BZ2,
                 AES, SKR, SKR_2, PKR, EML_FROM, ELF, TXT_UTF8, TXT_UTF16_BE, TXT_UTF16_LE, TXT_UTF32_BE, TXT_UTF32_LE,
+                HTML, HTML_Utf8Bom,
                 Mp3ID3, Wav, Flac, MIDI,
                 Tiff, TiffLittleEndian, TiffBigEndian, TiffBig,
                 MP4Container, Mp4ISOv1, MovQuickTime, MP4VideoFiles, Mp4QuickTime, Mp4VideoFile, ThreeGPP2File, Mp4A, FLV };

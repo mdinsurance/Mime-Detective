@@ -9,7 +9,7 @@ namespace MimeDetective.Analyzers
     {
         public FileType Key { get; } = MimeTypes.MS_OFFICE;
 
-        public static FileType[] MsDocTypes { get; } = new FileType[] { MimeTypes.PPT, MimeTypes.WORD, MimeTypes.EXCEL };
+        public static FileType[] MsDocTypes { get; } = new FileType[] { MimeTypes.PPT, MimeTypes.WORD, MimeTypes.EXCEL, MimeTypes.MSG };
 
         private readonly DictionaryTrie dictTrie;
 

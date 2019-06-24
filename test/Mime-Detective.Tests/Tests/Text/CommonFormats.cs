@@ -26,6 +26,17 @@ namespace MimeDetective.Tests.Text
         }
 
         [Fact]
+        public async Task IsHtml()
+        {
+            var info = new FileInfo(TextPath + "htmlFile.html");
+
+            var fileType = await info.GetFileTypeAsync();
+
+            Assert.Equal(MimeTypes.HTML.Extension, fileType.Extension);
+            Assert.Equal("text/html", fileType.Mime);
+        }
+
+        [Fact]
         public async Task IsXml_UTF8_WithBOM()
         {
             // this XML file is encoded with: UTF-8

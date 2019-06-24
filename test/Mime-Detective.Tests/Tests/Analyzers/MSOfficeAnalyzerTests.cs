@@ -24,6 +24,7 @@ namespace MimeDetective.Tests.Analyzers
         [InlineData("./Data/Documents/XlsExcel2016.xls", "xls")]
         [InlineData("./Data/Documents/PptPowerpoint2016.ppt", "ppt")]
         [InlineData("./Data/Documents/DocWord2016.doc", "doc")]
+        [InlineData("./Data/Documents/test.msg", "msg")]
         public async Task Search(string path, string ext)
         {
             var analyzer = new MsOfficeAnalyzer();
