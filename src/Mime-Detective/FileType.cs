@@ -13,11 +13,9 @@ namespace MimeDetective
 
         public ushort HeaderOffset { get; }
 
-        public string Extension { get; }
+        public string Extension { get; set; }
 
-        public string Mime { get; }
-
-        private readonly int hashCode;
+        public string Mime { get; set; }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="FileType"/> class
@@ -37,8 +35,6 @@ namespace MimeDetective
             HeaderOffset = offset;
             Extension = extension;
             Mime = mime;
-
-            hashCode = (base.GetHashCode() ^ Header.GetHashCode() ^ HeaderOffset ^ Extension.GetHashCode() ^ Mime.GetHashCode());
         }
 
         public static bool operator == (FileType a, FileType b)
@@ -95,7 +91,7 @@ namespace MimeDetective
             return true;
         }
 
-        public override int GetHashCode() => hashCode;
+        public override int GetHashCode() => (base.GetHashCode() ^ Header.GetHashCode() ^ HeaderOffset ^ Extension.GetHashCode() ^ Mime.GetHashCode());
 
         public override string ToString() => Extension;
     }
