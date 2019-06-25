@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-	<TargetFrameworks>netcoreapp2.1;netcoreapp2.0;netcoreapp1.1;net47</TargetFrameworks>
+	<TargetFramework>netcoreapp2.2</TargetFramework>
 	<AssemblyName>Mime-Detective.Benchmarks</AssemblyName>
 	<PackageId>Mime-Detective.Benchmarks</PackageId>
 	<OutputType>exe</OutputType>
@@ -9,10 +9,14 @@
   </PropertyGroup>
 
   <ItemGroup>
-	<ProjectReference Include="..\..\src\Mime-Detective\Mime-Detective.csproj" />
-	<PackageReference Include="BenchmarkDotNet">
-	  <Version>0.10.14</Version>
-	</PackageReference>
+    <PackageReference Include="BenchmarkDotNet" Version="0.11.5" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\Mime-Detective\Mime-Detective.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Update="System.Buffers" Version="4.4.0" />
   </ItemGroup>
 
