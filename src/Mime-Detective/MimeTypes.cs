@@ -89,6 +89,8 @@ namespace MimeDetective
         public readonly static FileType TXT_UTF32_BE = new FileType(new byte?[] { 0x00, 0x00, 0xFE, 0xFF }, "txt", "text/plain");
         public readonly static FileType TXT_UTF32_LE = new FileType(new byte?[] { 0xFF, 0xFE, 0x00, 0x00 }, "txt", "text/plain");
 
+        public readonly static FileType CSV = new FileType(EmptyHeader, "csv", "text/csv");
+
         #endregion office, excel, ppt and documents, xml, pdf, rtf, msdoc
 
         // graphics
@@ -248,6 +250,8 @@ namespace MimeDetective
         /// OpenDocument And OpenXML Document types
         /// </summary>
         public static readonly FileType[] XmlTypes = new FileType[] { WORDX, EXCELX, PPTX, ODS, ODT, ODG, ODP };
+
+        public readonly static FileType UNKNOWN = new FileType(EmptyHeader, "txt,csv", "text/plain");
 
         #endregion Constants
 

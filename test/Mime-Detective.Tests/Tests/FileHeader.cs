@@ -81,7 +81,12 @@ namespace MimeDetective.Tests
 		public void VerifyAllNonExcludedTypesArePresentInTypesArray()
 		{
 			var allTypeValues = GetAllTypeValues();
-			var zipFileTypesFilteredOut = allTypeValues.Except(MsOfficeAnalyzer.MsDocTypes).Except(MimeTypes.XmlTypes).Except(new FileType[] { MimeTypes.TXT });
+            var zipFileTypesFilteredOut = allTypeValues
+                                        .Except(MsOfficeAnalyzer.MsDocTypes)
+                                        .Except(MimeTypes.XmlTypes)
+                                        .Except(PlainTextAnalyzer.PlainTextTypes)
+                                        .Except(new[] { MimeTypes.UNKNOWN })
+                                        .Distinct();
 
 			Assert.NotNull(zipFileTypesFilteredOut);
 			Assert.NotEmpty(zipFileTypesFilteredOut);

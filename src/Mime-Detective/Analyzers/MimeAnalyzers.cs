@@ -38,6 +38,7 @@ namespace MimeDetective
         {
             SecondaryAnalyzers.Add(MimeTypes.ZIP, new ZipFileAnalyzer());
             SecondaryAnalyzers.Add(MimeTypes.MS_OFFICE, new MsOfficeAnalyzer());
+            SecondaryAnalyzers.Add(MimeTypes.UNKNOWN, new PlainTextAnalyzer());
         }
 
         internal static FileType GetFileType(in ReadResult readResult)

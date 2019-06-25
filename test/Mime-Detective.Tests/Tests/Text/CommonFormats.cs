@@ -37,6 +37,17 @@ namespace MimeDetective.Tests.Text
         }
 
         [Fact]
+        public async Task IsCsv()
+        {
+            var info = new FileInfo(TextPath + "test.csv");
+
+            var fileType = await info.GetFileTypeAsync();
+
+            Assert.Equal(MimeTypes.CSV.Extension, fileType.Extension);
+            Assert.Equal("text/csv", fileType.Mime);
+        }
+
+        [Fact]
         public async Task IsXml_UTF8_WithBOM()
         {
             // this XML file is encoded with: UTF-8

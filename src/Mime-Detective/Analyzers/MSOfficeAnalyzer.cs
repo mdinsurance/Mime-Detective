@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
+using System.Linq;
 using System.Text;
 
 namespace MimeDetective.Analyzers
@@ -20,7 +22,13 @@ namespace MimeDetective.Analyzers
 
         public FileType Search(in ReadResult readResult)
         {
-            return dictTrie.Search(in readResult) ?? Key;
+            var result = dictTrie.Search(in readResult);
+            if (result == null || result == MimeTypes.UNKNOWN)
+            {
+                return MimeTypes.MS_OFFICE;
+            }
+
+            return result;
         }
     }
 }

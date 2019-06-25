@@ -223,3 +223,4 @@ _Pvt_Extensions
 /coverage.xml
 /Data
 */.vs
+*.ncrunchsolution

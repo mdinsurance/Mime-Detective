@@ -64,7 +64,12 @@ namespace MimeDetective.Analyzers
                 }
             }
 
-            return match;
+            if (match == null && (readResult.ReadLength < 1 || (int)readResult.Array[0] < 31))
+            {
+                return null;
+            }
+
+            return match ?? MimeTypes.UNKNOWN;
         }
 
         public void Insert(FileType type)
@@ -76,6 +81,11 @@ namespace MimeDetective.Analyzers
             {
                 offsetNode = new Node(type.HeaderOffset);
                 Nodes.Add(type.HeaderOffset, offsetNode);
+            }
+
+            if (type.Header.Length == 0)
+            {
+                return;
             }
 
             int i = 0;

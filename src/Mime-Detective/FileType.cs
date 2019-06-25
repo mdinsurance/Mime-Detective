@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Runtime.InteropServices;
 
 namespace MimeDetective
@@ -7,6 +8,7 @@ namespace MimeDetective
     /// Data Structure to hold information about file types.
     /// Holds information about binary header at the start of the file
     /// </summary>
+    [DebuggerDisplay("{Extension} - {Mime}")]
     public class FileType : IEquatable<FileType>
     {
         public byte?[] Header { get; }
