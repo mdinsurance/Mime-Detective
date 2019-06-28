@@ -1,5 +1,4 @@
-﻿using System;
-using System.IO;
+﻿using System.IO;
 using System.Threading.Tasks;
 
 namespace MimeDetective.Extensions
@@ -18,7 +17,7 @@ namespace MimeDetective.Extensions
         {
             using (ReadResult readResult = ReadResult.ReadHeaderFromStream(stream, shouldDisposeStream: false, shouldResetStreamPosition: true))
             {
-                return MimeAnalyzers.GetFileType(in readResult);
+                return MimeAnalyzers.GetFileType(in readResult, null, null);
             }
         }
 
@@ -30,11 +29,11 @@ namespace MimeDetective.Extensions
         /// </summary>
         /// <param name="file">The FileInfo object.</param>
         /// <returns>FileType or null not identified</returns>
-        public static FileType GetFileType(this Stream stream, bool shouldDisposeStream = false, bool shouldResetStreamPosition = true)
+        public static FileType GetFileType(this Stream stream, bool shouldDisposeStream = false, bool shouldResetStreamPosition = true, string mimeHint = null, string extensionHint = null)
         {
             using (ReadResult readResult = ReadResult.ReadHeaderFromStream(stream, shouldDisposeStream, shouldResetStreamPosition))
             {
-                return MimeAnalyzers.GetFileType(in readResult);
+                return MimeAnalyzers.GetFileType(in readResult, mimeHint, extensionHint);
             }
         }
 
@@ -50,7 +49,7 @@ namespace MimeDetective.Extensions
         {
             using (ReadResult readResult = await ReadResult.ReadHeaderFromStreamAsync(stream, shouldDisposeStream: false, shouldResetStreamPosition: true))
             {
-                return MimeAnalyzers.GetFileType(in readResult);
+                return MimeAnalyzers.GetFileType(in readResult, null, null);
             }
         }
 
@@ -62,11 +61,11 @@ namespace MimeDetective.Extensions
         /// </summary>
         /// <param name="file">The FileInfo object.</param>
         /// <returns>FileType or null not identified</returns>
-        public static async Task<FileType> GetFileTypeAsync(this Stream stream, bool shouldDisposeStream = false, bool shouldResetStreamPosition = true)
+        public static async Task<FileType> GetFileTypeAsync(this Stream stream, bool shouldDisposeStream = false, bool shouldResetStreamPosition = true, string mimeHint = null, string extensionHint = null)
         {
             using (ReadResult readResult = await ReadResult.ReadHeaderFromStreamAsync(stream, shouldDisposeStream, shouldResetStreamPosition))
             {
-                return MimeAnalyzers.GetFileType(in readResult);
+                return MimeAnalyzers.GetFileType(in readResult, mimeHint, extensionHint);
             }
         }
     }

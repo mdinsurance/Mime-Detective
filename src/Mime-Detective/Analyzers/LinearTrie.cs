@@ -60,15 +60,15 @@ namespace MimeDetective.Analyzers
 
             OffsetNodes[0] = new OffsetNode(0);
 
-            foreach (var type in types)
+            foreach (FileType type in types)
             {
-                if ((object)type != null)
+                if (!(type is null))
                     Insert(type);
             }
         }
 
         //TODO need tests for highestmatching count behavior
-        public unsafe FileType Search(in ReadResult readResult)
+        public unsafe FileType Search(in ReadResult readResult, string mimeHint = null, string extensionHint = null)
         {
             FileType match = null;
             int highestMatchingCount = 0;
@@ -91,7 +91,9 @@ namespace MimeDetective.Analyzers
                         triePos = node.Children[NullStandInValue];
 
                         if (triePos <= 0)
+                        {
                             break;
+                        }
                     }
 
                     node = ref offsetNode.Trie[triePos];
@@ -105,7 +107,7 @@ namespace MimeDetective.Analyzers
                     }
                 }
             }
-            
+
             return match;
         }
 
@@ -136,7 +138,7 @@ namespace MimeDetective.Analyzers
                 {
                     //TODO put max size check
                     int newOffsetNodeCount = OffsetNodes.Length * 2;
-                    var newOffsetNodes = new OffsetNode[newOffsetNodeCount];
+                    OffsetNode[] newOffsetNodes = new OffsetNode[newOffsetNodeCount];
                     Array.Copy(OffsetNodes, newOffsetNodes, offsetNodesLength);
                     OffsetNodes = newOffsetNodes;
                 }
@@ -165,7 +167,7 @@ namespace MimeDetective.Analyzers
                     {
                         //TODO put max size check
                         int newTrieNodeCount = offsetNode.Trie.Length * 2;
-                        var newTrieNodes = new Node[newTrieNodeCount];
+                        Node[] newTrieNodes = new Node[newTrieNodeCount];
                         Array.Copy(offsetNode.Trie, newTrieNodes, offsetNode.TrieLength);
                         offsetNode.Trie = newTrieNodes;
                     }

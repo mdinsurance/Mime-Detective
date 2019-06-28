@@ -154,7 +154,7 @@ namespace MimeDetective
 
         public void Dispose()
         {
-            bool sourceIsNotNull = (object)Source != null;
+            bool sourceIsNotNull = !(Source is null);
 
             if (sourceIsNotNull && ShouldResetStreamPosition && Source.CanSeek)
                 Source.Seek(0, SeekOrigin.Begin);

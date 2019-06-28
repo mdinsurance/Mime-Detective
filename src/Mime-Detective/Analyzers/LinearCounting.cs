@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
-using System.Linq;
 
 namespace MimeDetective.Analyzers
 {
@@ -24,11 +22,13 @@ namespace MimeDetective.Analyzers
         public LinearCounting(IEnumerable<FileType> fileTypes)
         {
             if (fileTypes is null)
-                ThrowHelpers.FileTypeEnumerableIsNull();
-
-            foreach (var fileType in fileTypes)
             {
-                if ((object)fileType != null)
+                ThrowHelpers.FileTypeEnumerableIsNull();
+            }
+
+            foreach (FileType fileType in fileTypes)
+            {
+                if (!(fileType is null))
                     Insert(fileType);
             }
 
@@ -46,7 +46,7 @@ namespace MimeDetective.Analyzers
             if (typesLength >= types.Length)
             {
                 int newTypesCount = types.Length * 2;
-                var newTypes = new FileType[newTypesCount];
+                FileType[] newTypes = new FileType[newTypesCount];
                 Array.Copy(types, newTypes, typesLength);
                 types = newTypes;
             }
@@ -55,7 +55,7 @@ namespace MimeDetective.Analyzers
             typesLength++;
         }
 
-        public FileType Search(in ReadResult readResult)
+        public FileType Search(in ReadResult readResult, string mimeHint = null, string extensionHint = null)
         {
             uint highestMatchingCount = 0;
             FileType highestMatchingType = null;

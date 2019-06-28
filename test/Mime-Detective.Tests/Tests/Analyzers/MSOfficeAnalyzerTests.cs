@@ -1,8 +1,5 @@
 ﻿using MimeDetective.Analyzers;
-using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Text;
 using System.Threading.Tasks;
 using Xunit;
 
@@ -27,7 +24,7 @@ namespace MimeDetective.Tests.Analyzers
         [InlineData("./Data/Documents/test.msg", "msg")]
         public async Task Search(string path, string ext)
         {
-            var analyzer = new MsOfficeAnalyzer();
+            MsOfficeAnalyzer analyzer = new MsOfficeAnalyzer();
             FileInfo file = new FileInfo(path);
             FileType type = null;
 

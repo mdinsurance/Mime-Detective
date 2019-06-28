@@ -1,5 +1,5 @@
-﻿using System;
-using MimeDetective.Analyzers;
+﻿using MimeDetective.Analyzers;
+using System;
 using System.Collections.Generic;
 
 namespace MimeDetective
@@ -16,10 +16,7 @@ namespace MimeDetective
         /// </summary>
         public static IFileAnalyzer PrimaryAnalyzer
         {
-            get
-            {
-                return primaryAnalyzer;
-            }
+            get => primaryAnalyzer;
 
             set
             {
@@ -41,15 +38,15 @@ namespace MimeDetective
             SecondaryAnalyzers.Add(MimeTypes.UNKNOWN, new PlainTextAnalyzer());
         }
 
-        internal static FileType GetFileType(in ReadResult readResult)
+        internal static FileType GetFileType(in ReadResult readResult, string mimeHint = null, string extensionHint = null)
         {
             FileType match = null;
 
-            match = PrimaryAnalyzer.Search(in readResult);
+            match = PrimaryAnalyzer.Search(in readResult, mimeHint, extensionHint);
 
-            if ((object)match != null && SecondaryAnalyzers.TryGetValue(match, out var secondaryAnalyzer))
+            if (!(match is null) && SecondaryAnalyzers.TryGetValue(match, out IReadOnlyFileAnalyzer secondaryAnalyzer))
             {
-                match = secondaryAnalyzer.Search(in readResult);
+                match = secondaryAnalyzer.Search(in readResult, mimeHint, extensionHint);
             }
 
             return match;

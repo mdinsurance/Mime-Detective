@@ -1,13 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Runtime.CompilerServices;
-
-namespace MimeDetective.Analyzers
+﻿namespace MimeDetective.Analyzers
 {
     public interface IReadOnlyFileAnalyzer
     {
-        FileType Search(in ReadResult readResult);
+        FileType Search(in ReadResult readResult, string mimeHint = null, string extensionHint = null);
     }
 
     public interface IFileAnalyzer : IReadOnlyFileAnalyzer

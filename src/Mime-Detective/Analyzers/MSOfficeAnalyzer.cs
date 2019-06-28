@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
-
-namespace MimeDetective.Analyzers
+﻿namespace MimeDetective.Analyzers
 {
     //TODO maybe turn this into an OLE Doc type analyzer
     public class MsOfficeAnalyzer : IReadOnlyFileAnalyzer
@@ -20,9 +14,9 @@ namespace MimeDetective.Analyzers
             dictTrie = new DictionaryTrie(MsDocTypes);
         }
 
-        public FileType Search(in ReadResult readResult)
+        public FileType Search(in ReadResult readResult, string mimeHint = null, string extensionHint = null)
         {
-            var result = dictTrie.Search(in readResult);
+            FileType result = dictTrie.Search(in readResult);
             if (result == null || result == MimeTypes.UNKNOWN)
             {
                 return MimeTypes.MS_OFFICE;

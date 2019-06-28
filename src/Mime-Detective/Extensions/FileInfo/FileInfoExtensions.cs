@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
 
@@ -15,11 +14,11 @@ namespace MimeDetective
         /// </summary>
         /// <param name="file">The FileInfo object.</param>
         /// <returns>FileType or null (for no match)</returns>
-        public static FileType GetFileType(this FileInfo file)
+        public static FileType GetFileType(this FileInfo file, string mimeHint = null, string extensionHint = null)
         {
             using (ReadResult readResult = ReadResult.ReadFileHeader(file))
             {
-                return MimeAnalyzers.GetFileType(in readResult);
+                return MimeAnalyzers.GetFileType(in readResult, mimeHint, extensionHint);
             }
         }
 
@@ -31,11 +30,11 @@ namespace MimeDetective
         /// </summary>
         /// <param name="file">The FileInfo object.</param>
         /// <returns>FileType or null (for no match)</returns>
-        public static async Task<FileType> GetFileTypeAsync(this FileInfo file)
+        public static async Task<FileType> GetFileTypeAsync(this FileInfo file, string mimeHint = null, string extensionHint = null)
         {
             using (ReadResult readResult = await ReadResult.ReadFileHeaderAsync(file))
             {
-                return MimeAnalyzers.GetFileType(in readResult);
+                return MimeAnalyzers.GetFileType(in readResult, mimeHint, extensionHint);
             }
         }
 
@@ -53,7 +52,9 @@ namespace MimeDetective
 
             //TODO Write a test to check if this null check is correct
             if (currentType.Mime == null)
+            {
                 return false;
+            }
 
             return requiredTypes.Contains(currentType);
         }
@@ -67,7 +68,7 @@ namespace MimeDetective
         /// <returns>
         ///   <c>true</c> if file of the one of the provided types; otherwise, <c>false</c>.
         /// </returns>
-        public static bool IsFileOfTypes(this FileInfo file, String CSV)
+        public static bool IsFileOfTypes(this FileInfo file, string CSV)
         {
             List<FileType> providedTypes = MimeTypes.GetFileTypesByExtensions(CSV);
 
@@ -88,7 +89,9 @@ namespace MimeDetective
 
             //TODO Write a test to check if this null check is correct
             if (actualType.Mime is null)
+            {
                 return false;
+            }
 
             return (actualType.Equals(type));
         }

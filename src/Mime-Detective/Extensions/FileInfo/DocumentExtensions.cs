@@ -36,9 +36,9 @@ namespace MimeDetective
         /// </returns>
         public static bool IsWord(this FileInfo fileInfo)
         {
-            var fileType = fileInfo.GetFileType();
+            FileType fileType = fileInfo.GetFileType();
 
-            return (fileType == MimeTypes.WORD) || (fileType == MimeTypes.WORDX) || (fileType == MimeTypes.MS_OFFICE);
+            return (fileType == MimeTypes.WORD) || (fileType == MimeTypes.WORDX) || (fileType == MimeTypes.WORDM) || (fileType == MimeTypes.MS_OFFICE);
         }
 
         /// <summary>
@@ -51,7 +51,7 @@ namespace MimeDetective
         /// </returns>
         public static bool IsPowerPoint(this FileInfo fileInfo)
         {
-            var fileType = fileInfo.GetFileType();
+            FileType fileType = fileInfo.GetFileType();
 
             return (fileType == MimeTypes.PPT) || (fileType == MimeTypes.PPTX) || (fileType == MimeTypes.MS_OFFICE);
         }
@@ -66,9 +66,9 @@ namespace MimeDetective
         /// </returns>
         public static bool IsExcel(this FileInfo fileInfo)
         {
-            var fileType = fileInfo.GetFileType();
+            FileType fileType = fileInfo.GetFileType();
 
-            return (fileType == MimeTypes.EXCEL) || (fileType == MimeTypes.EXCELX) || (fileType == MimeTypes.MS_OFFICE);
+            return (fileType == MimeTypes.EXCEL) || (fileType == MimeTypes.EXCELX) || (fileType == MimeTypes.EXCELB) || (fileType == MimeTypes.EXCELM) || (fileType == MimeTypes.MS_OFFICE);
         }
     }
 }

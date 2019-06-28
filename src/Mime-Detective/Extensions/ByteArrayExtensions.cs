@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace MimeDetective
+﻿namespace MimeDetective
 {
     public static class ByteArrayExtensions
     {
@@ -12,12 +10,12 @@ namespace MimeDetective
         /// </summary>
         /// <param name="file">The FileInfo object.</param>
         /// <returns>FileType or null not identified</returns>
-        public static FileType GetFileType(this byte[] bytes)
+        public static FileType GetFileType(this byte[] bytes, string mimeHint = null, string extensionHint = null)
         {
             int min = bytes.Length > MimeTypes.MaxHeaderSize ? MimeTypes.MaxHeaderSize : bytes.Length;
             using (ReadResult readResult = new ReadResult(bytes, min))
             {
-                return MimeAnalyzers.GetFileType(in readResult);
+                return MimeAnalyzers.GetFileType(in readResult, mimeHint, extensionHint);
             }
         }
     }

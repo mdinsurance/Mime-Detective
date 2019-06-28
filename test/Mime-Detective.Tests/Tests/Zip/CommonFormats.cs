@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using Xunit;
 using static MimeDetective.Utilities.TypeComparisions;
 
@@ -17,7 +14,7 @@ namespace MimeDetective.Tests.Zip
         [InlineData("ImagesBy7zip")]
         public async Task IsZip(string file)
         {
-            var fileInfo = GetFileInfo(dataPath, file, ".zip");
+            System.IO.FileInfo fileInfo = GetFileInfo(dataPath, file, ".zip");
 
             Assert.True(fileInfo.IsZip());
 
@@ -29,7 +26,7 @@ namespace MimeDetective.Tests.Zip
         [InlineData("EmptiedBy7zip")]
         public async Task IsEmptyZip(string file)
         {
-            var fileInfo = GetFileInfo(dataPath, file, ".zip");
+            System.IO.FileInfo fileInfo = GetFileInfo(dataPath, file, ".zip");
 
             Assert.True(fileInfo.IsZip());
 
@@ -39,7 +36,7 @@ namespace MimeDetective.Tests.Zip
         [Fact]
         public async Task Is7zip()
         {
-            var fileInfo = GetFileInfo(dataPath, "Images", ".7z");
+            System.IO.FileInfo fileInfo = GetFileInfo(dataPath, "Images", ".7z");
 
             await AssertIsType(fileInfo, MimeTypes.ZIP_7z);
         }
@@ -47,9 +44,24 @@ namespace MimeDetective.Tests.Zip
         [Fact]
         public async Task IsRar()
         {
-            var fileInfo = GetFileInfo(dataPath, "TestBlender", ".rar");
+            System.IO.FileInfo fileInfo = GetFileInfo(dataPath, "TestBlender", ".rar");
 
             await AssertIsType(fileInfo, MimeTypes.RAR);
+        }
+
+        [Fact]
+        public async Task HintsAreUsedWhenNoSecondaryMatch()
+        {
+            System.IO.FileInfo fileInfo = GetFileInfo(dataPath, "my-custom-format", ".custom");
+
+            string mimeHint = "mime-hint";
+            string extensionHint = "extensionHint";
+            FileType fileType = await fileInfo.GetFileTypeAsync(mimeHint, extensionHint);
+
+            Assert.Equal(MimeTypes.ZIP.Header, fileType.Header);
+            Assert.Equal(MimeTypes.ZIP.HeaderOffset, fileType.HeaderOffset);
+            Assert.Equal(mimeHint, fileType.Mime);
+            Assert.Equal(extensionHint, fileType.Extension);
         }
 
         /*

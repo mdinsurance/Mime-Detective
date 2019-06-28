@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using System.Collections.Generic;
 
 namespace MimeDetective.Analyzers
 {
@@ -28,17 +26,17 @@ namespace MimeDetective.Analyzers
             if (types is null)
                 ThrowHelpers.FileTypeEnumerableIsNull();
 
-            foreach (var type in types)
+            foreach (FileType type in types)
             {
-                if ((object)type != null)
+                if (!(type is null))
                     Insert(type);
             }
         }
 
-        public FileType Search(in ReadResult readResult)
+        public FileType Search(in ReadResult readResult, string mimeHint = null, string extensionHint = null)
         {
             FileType match = null;
-            var enumerator = Nodes.GetEnumerator();
+            Dictionary<ushort, Node>.Enumerator enumerator = Nodes.GetEnumerator();
             int highestMatchingCount = 0;
 
             while (enumerator.MoveNext())
@@ -52,11 +50,13 @@ namespace MimeDetective.Analyzers
 
                     if (!prevNode.Children.TryGetValue(readResult.Array[i], out node)
                         && !prevNode.Children.TryGetValue(NullStandInValue, out node))
+                    {
                         break;
+                    }
 
                     i++;
 
-                    if (i > highestMatchingCount && (object)node.Record != null)
+                    if (i > highestMatchingCount && !(node.Record is null))
                     {
                         match = node.Record;
                         highestMatchingCount = i;
@@ -64,7 +64,7 @@ namespace MimeDetective.Analyzers
                 }
             }
 
-            if (match == null && (readResult.ReadLength < 1 || (int)readResult.Array[0] < 31))
+            if (match == null && (readResult.ReadLength < 1 || readResult.Array[0] < 31))
             {
                 return null;
             }
@@ -77,7 +77,7 @@ namespace MimeDetective.Analyzers
             if (type is null)
                 ThrowHelpers.FileTypeArgumentIsNull();
 
-            if (!Nodes.TryGetValue(type.HeaderOffset, out var offsetNode))
+            if (!Nodes.TryGetValue(type.HeaderOffset, out Node offsetNode))
             {
                 offsetNode = new Node(type.HeaderOffset);
                 Nodes.Add(type.HeaderOffset, offsetNode);
