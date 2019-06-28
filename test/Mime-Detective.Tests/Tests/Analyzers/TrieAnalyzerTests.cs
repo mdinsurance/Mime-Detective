@@ -5,7 +5,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Linq.Expressions;
-using System.Text;
 using System.Threading.Tasks;
 using Xunit;
 
@@ -15,11 +14,11 @@ namespace MimeDetective.Tests.Analyzers
     {
         public static IFileAnalyzer DefaultCtor(this Type type) => Activator.CreateInstance(type) as IFileAnalyzer;
 
-        private readonly static ConcurrentDictionary<Type, Func<IEnumerable<FileType>, IFileAnalyzer>> ctorCache = new ConcurrentDictionary<Type, Func<IEnumerable<FileType>, IFileAnalyzer>>();
+        private static readonly ConcurrentDictionary<Type, Func<IEnumerable<FileType>, IFileAnalyzer>> ctorCache = new ConcurrentDictionary<Type, Func<IEnumerable<FileType>, IFileAnalyzer>>();
 
         public static IFileAnalyzer EnumerableCtor(this Type type, IEnumerable<FileType> fileTypes)
         {
-            if(!ctorCache.TryGetValue(type, out var func))
+            if (!ctorCache.TryGetValue(type, out var func))
             {
                 var ctor = type.GetConstructors().Where(x => x.GetParameters().Any(y => y.ParameterType == typeof(IEnumerable<FileType>))).Single();
                 var info = Expression.Parameter(typeof(IEnumerable<FileType>), "fileTypes");
@@ -42,7 +41,7 @@ namespace MimeDetective.Tests.Analyzers
         [InlineData(typeof(LinearCounting))]
         public void DefaultConstructor(Type type)
         {
-            IFileAnalyzer analyzer = type.DefaultCtor();
+            var analyzer = type.DefaultCtor();
 
             //assertion here just to have
             Assert.NotNull(analyzer);
@@ -58,13 +57,13 @@ namespace MimeDetective.Tests.Analyzers
         [InlineData(typeof(LinearCounting))]
         public void EnumerableConstructor(Type type)
         {
-            IFileAnalyzer analyzer = type.EnumerableCtor(MimeTypes.Types);
+            var analyzer = type.EnumerableCtor(MimeTypes.Types);
 
             //assertion here just to have
             Assert.NotNull(analyzer);
             Assert.Throws<ArgumentNullException>(() => type.EnumerableCtor(null));
 
-            IFileAnalyzer emptyAnalyzer = type.EnumerableCtor(Enumerable.Empty<FileType>());
+            var emptyAnalyzer = type.EnumerableCtor(Enumerable.Empty<FileType>());
             Assert.NotNull(emptyAnalyzer);
 
             analyzer.Insert(MimeTypes.WORD);
@@ -78,9 +77,9 @@ namespace MimeDetective.Tests.Analyzers
         [InlineData(typeof(LinearCounting))]
         public void EnumerableCtorDoesNotThrowIfSequenceContainsNull(Type type)
         {
-            FileType[] types = new FileType[] { MimeTypes.ELF, null, MimeTypes.DLL_EXE };
+            var types = new FileType[] { MimeTypes.ELF, null, MimeTypes.DLL_EXE };
 
-            IFileAnalyzer analyzer = type.EnumerableCtor(types);
+            var analyzer = type.EnumerableCtor(types);
 
             Assert.NotNull(analyzer);
         }
@@ -111,10 +110,10 @@ namespace MimeDetective.Tests.Analyzers
             var analyzer = new LinearTrie();
             analyzer.Insert(MimeTypes.ICO);
 
-            FileInfo file = new FileInfo(path);
+            var file = new FileInfo(path);
             FileType type = null;
 
-            using (ReadResult result = await ReadResult.ReadFileHeaderAsync(file))
+            using (var result = await ReadResult.ReadFileHeaderAsync(file))
             {
                 type = analyzer.Search(in result);
             }
@@ -217,11 +216,11 @@ namespace MimeDetective.Tests.Analyzers
         public async Task Search(Type analyzerType, string path, string ext)
         {
             var analyzer = analyzerType.EnumerableCtor(MimeTypes.Types);
-            IEnumerable<FileType> expectedTypes = MimeTypes.Types.Where(x => x.Extension.Contains(ext));
-            FileInfo file = new FileInfo(path);
+            var expectedTypes = MimeTypes.Types.Where(x => x.Extension.Contains(ext));
+            var file = new FileInfo(path);
             FileType type = null;
 
-            using (ReadResult result = await ReadResult.ReadFileHeaderAsync(file))
+            using (var result = await ReadResult.ReadFileHeaderAsync(file))
             {
                 type = analyzer.Search(in result);
             }
@@ -240,9 +239,9 @@ namespace MimeDetective.Tests.Analyzers
         public void InsertZeroOffsetFirstWildCard(Type type)
         {
             var analyzer = type.DefaultCtor();
-            FileType fileType = new FileType(new byte?[1], "ext", "app/ext", 0);
+            var fileType = new FileType(new byte?[1], "ext", "app/ext", 0);
             analyzer.Insert(fileType);
-            ReadResult readResult = new ReadResult(new byte[1], 1);
+            var readResult = new ReadResult(new byte[1], 1);
             var result = analyzer.Search(in readResult);
             Assert.NotNull(result);
             Assert.Same(fileType, result);
@@ -258,9 +257,9 @@ namespace MimeDetective.Tests.Analyzers
         public void InsertLastOffsetWildCard(Type type)
         {
             var analyzer = type.DefaultCtor();
-            FileType fileType = new FileType(new byte?[1], "ext", "app/ext", 559);
+            var fileType = new FileType(new byte?[1], "ext", "app/ext", 559);
             analyzer.Insert(fileType);
-            ReadResult readResult = new ReadResult(new byte[560], 560);
+            var readResult = new ReadResult(new byte[560], 560);
             var result = analyzer.Search(in readResult);
             Assert.NotNull(result);
             Assert.Same(fileType, result);
@@ -276,9 +275,9 @@ namespace MimeDetective.Tests.Analyzers
         public void InsertLastOffsetWildCardFull(Type type)
         {
             var analyzer = type.DefaultCtor();
-            FileType fileType = new FileType(new byte?[560], "ext", "app/ext", 559);
+            var fileType = new FileType(new byte?[560], "ext", "app/ext", 559);
             analyzer.Insert(fileType);
-            ReadResult readResult = new ReadResult(new byte[1120], 1120);
+            var readResult = new ReadResult(new byte[1120], 1120);
             var result = analyzer.Search(in readResult);
             Assert.NotNull(result);
             Assert.Same(fileType, result);
@@ -295,15 +294,15 @@ namespace MimeDetective.Tests.Analyzers
         {
             var analyzer = type.DefaultCtor();
 
-            for (int i = 0; i < 560; i++)
+            for (var i = 0; i < 560; i++)
             {
                 var bytes = new byte?[1];
-                FileType fileType = new FileType(bytes, "ext" + i, "app/ext" + 1, (ushort)i);
+                var fileType = new FileType(bytes, "ext" + i, "app/ext" + 1, (ushort)i);
                 analyzer.Insert(fileType);
 
-                var bytes1 = new byte[i+1];
-                ReadResult readResult = new ReadResult(bytes1, bytes1.Length);
-                FileType result = analyzer.Search(in readResult);
+                var bytes1 = new byte[i + 1];
+                var readResult = new ReadResult(bytes1, bytes1.Length);
+                var result = analyzer.Search(in readResult);
 
                 Assert.NotNull(result);
                 Assert.Same(fileType, result);
@@ -320,21 +319,21 @@ namespace MimeDetective.Tests.Analyzers
         public void InsertSearchBoundries(Type type)
         {
             var analyzer = type.DefaultCtor();
-            List<FileType> fileTypes = new List<FileType>();
+            var fileTypes = new List<FileType>();
 
-            for (int i = 0; i < 560; i++)
+            for (var i = 0; i < 560; i++)
             {
                 var bytes = new byte?[1];
-                FileType fileType = new FileType(bytes, "ext" + i, "app/ext" + 1, (ushort)i);
+                var fileType = new FileType(bytes, "ext" + i, "app/ext" + 1, (ushort)i);
                 analyzer.Insert(fileType);
                 fileTypes.Add(fileType);
             }
 
-            for (int i = 0; i < 560; i++)
+            for (var i = 0; i < 560; i++)
             {
                 var bytes = new byte[i + 1];
-                ReadResult readResult = new ReadResult(bytes, bytes.Length);
-                FileType result = analyzer.Search(in readResult);
+                var readResult = new ReadResult(bytes, bytes.Length);
+                var result = analyzer.Search(in readResult);
                 Assert.NotNull(result);
                 Assert.Same(fileTypes[i], result);
                 Assert.Equal(i, result.HeaderOffset);
@@ -351,29 +350,29 @@ namespace MimeDetective.Tests.Analyzers
         {
             var trie = type.DefaultCtor();
 
-            FileType type1 = new FileType(new byte?[] { 1, 0, 1 }, "ext1", "app/ext1");
-            byte[] type1Bytes = new byte[] { 1, 0, 1 };
-            FileType type2 = new FileType(new byte?[] { 1, 0, 1, 0, 1 }, "ext2", "app/ext2");
-            byte[] type2Bytes = new byte[] { 1, 0, 1, 0, 1 };
-            FileType type3 = new FileType(new byte?[] { 1, 0, 1, 0, 1, 0, 1 }, "ext3", "app/ext3");
-            byte[] type3Bytes = new byte[] { 1, 0, 1, 0, 1, 0, 1 };
+            var type1 = new FileType(new byte?[] { 1, 0, 1 }, "ext1", "app/ext1");
+            var type1Bytes = new byte[] { 1, 0, 1 };
+            var type2 = new FileType(new byte?[] { 1, 0, 1, 0, 1 }, "ext2", "app/ext2");
+            var type2Bytes = new byte[] { 1, 0, 1, 0, 1 };
+            var type3 = new FileType(new byte?[] { 1, 0, 1, 0, 1, 0, 1 }, "ext3", "app/ext3");
+            var type3Bytes = new byte[] { 1, 0, 1, 0, 1, 0, 1 };
 
             trie.Insert(type3);
             trie.Insert(type2);
             trie.Insert(type1);
 
             //lookup type 1
-            FileType type1Result = trie.Search(new ReadResult(type1Bytes, type1Bytes.Length));
+            var type1Result = trie.Search(new ReadResult(type1Bytes, type1Bytes.Length));
             Assert.NotNull(type1Result);
             Assert.Same(type1, type1Result);
 
             //lookup type 2
-            FileType type2Result = trie.Search(new ReadResult(type2Bytes, type2Bytes.Length));
+            var type2Result = trie.Search(new ReadResult(type2Bytes, type2Bytes.Length));
             Assert.NotNull(type2Result);
             Assert.Same(type2, type2Result);
 
             //lookup type 3
-            FileType type3Result = trie.Search(new ReadResult(type3Bytes, type3Bytes.Length));
+            var type3Result = trie.Search(new ReadResult(type3Bytes, type3Bytes.Length));
             Assert.NotNull(type3Result);
             Assert.Same(type3, type3Result);
         }
@@ -388,29 +387,29 @@ namespace MimeDetective.Tests.Analyzers
         {
             var trie = type.DefaultCtor();
 
-            FileType type1 = new FileType(new byte?[] { 1, 0, 1 }, "ext1", "app/ext1");
-            byte[] type1Bytes = new byte[] { 1, 0, 1 };
-            FileType type2 = new FileType(new byte?[] { 1, 0, 1, 0, 1 }, "ext2", "app/ext2");
-            byte[] type2Bytes = new byte[] { 1, 0, 1, 0, 1 };
-            FileType type3 = new FileType(new byte?[] { 1, 0, 1, 0, 1, 0, 1 }, "ext3", "app/ext3");
-            byte[] type3Bytes = new byte[] { 1, 0, 1, 0, 1, 0, 1 };
+            var type1 = new FileType(new byte?[] { 1, 0, 1 }, "ext1", "app/ext1");
+            var type1Bytes = new byte[] { 1, 0, 1 };
+            var type2 = new FileType(new byte?[] { 1, 0, 1, 0, 1 }, "ext2", "app/ext2");
+            var type2Bytes = new byte[] { 1, 0, 1, 0, 1 };
+            var type3 = new FileType(new byte?[] { 1, 0, 1, 0, 1, 0, 1 }, "ext3", "app/ext3");
+            var type3Bytes = new byte[] { 1, 0, 1, 0, 1, 0, 1 };
 
             trie.Insert(type1);
             trie.Insert(type2);
             trie.Insert(type3);
 
             //lookup type 1
-            FileType type1Result = trie.Search(new ReadResult(type1Bytes, type1Bytes.Length));
+            var type1Result = trie.Search(new ReadResult(type1Bytes, type1Bytes.Length));
             Assert.NotNull(type1Result);
             Assert.Same(type1, type1Result);
 
             //lookup type 2
-            FileType type2Result = trie.Search(new ReadResult(type2Bytes, type2Bytes.Length));
+            var type2Result = trie.Search(new ReadResult(type2Bytes, type2Bytes.Length));
             Assert.NotNull(type2Result);
             Assert.Same(type2, type2Result);
 
             //lookup type 3
-            FileType type3Result = trie.Search(new ReadResult(type3Bytes, type3Bytes.Length));
+            var type3Result = trie.Search(new ReadResult(type3Bytes, type3Bytes.Length));
             Assert.NotNull(type3Result);
             Assert.Same(type3, type3Result);
         }

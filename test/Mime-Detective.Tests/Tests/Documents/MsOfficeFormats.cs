@@ -1,10 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using Xunit;
-using System.IO;
-using MimeDetective;
 using static MimeDetective.Utilities.TypeComparisions;
 
 namespace MimeDetective.Tests.Documents

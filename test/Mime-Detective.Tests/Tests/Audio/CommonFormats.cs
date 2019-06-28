@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using Xunit;
 using static MimeDetective.Utilities.TypeComparisions;
 
@@ -9,7 +6,7 @@ namespace MimeDetective.Tests.Audio
 {
     public class CommonFormats
     {
-        public const String AudioPath = "./Data/Audio";
+        public const string AudioPath = "./Data/Audio";
 
         [Theory]
         [InlineData("mp3ID3Test1.mp3")]

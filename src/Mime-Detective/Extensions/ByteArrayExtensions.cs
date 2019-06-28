@@ -12,8 +12,8 @@
         /// <returns>FileType or null not identified</returns>
         public static FileType GetFileType(this byte[] bytes, string mimeHint = null, string extensionHint = null)
         {
-            int min = bytes.Length > MimeTypes.MaxHeaderSize ? MimeTypes.MaxHeaderSize : bytes.Length;
-            using (ReadResult readResult = new ReadResult(bytes, min))
+            var min = bytes.Length > MimeTypes.MaxHeaderSize ? MimeTypes.MaxHeaderSize : bytes.Length;
+            using (var readResult = new ReadResult(bytes, min))
             {
                 return MimeAnalyzers.GetFileType(in readResult, mimeHint, extensionHint);
             }

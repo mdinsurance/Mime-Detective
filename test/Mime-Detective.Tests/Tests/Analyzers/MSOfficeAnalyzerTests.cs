@@ -10,7 +10,7 @@ namespace MimeDetective.Tests.Analyzers
         [Fact]
         public void DefaultConstructor()
         {
-            MsOfficeAnalyzer analyzer = new MsOfficeAnalyzer();
+            var analyzer = new MsOfficeAnalyzer();
 
             //assertion here just to have
             Assert.NotNull(analyzer);
@@ -24,11 +24,11 @@ namespace MimeDetective.Tests.Analyzers
         [InlineData("./Data/Documents/test.msg", "msg")]
         public async Task Search(string path, string ext)
         {
-            MsOfficeAnalyzer analyzer = new MsOfficeAnalyzer();
-            FileInfo file = new FileInfo(path);
+            var analyzer = new MsOfficeAnalyzer();
+            var file = new FileInfo(path);
             FileType type = null;
 
-            using (ReadResult result = await ReadResult.ReadFileHeaderAsync(file))
+            using (var result = await ReadResult.ReadFileHeaderAsync(file))
             {
                 type = analyzer.Search(in result);
             }

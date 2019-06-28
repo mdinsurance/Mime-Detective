@@ -1,7 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Text;
 using System.Threading.Tasks;
 using Xunit;
 
@@ -9,17 +7,17 @@ namespace MimeDetective.Tests.Extensions
 {
     public class FileInfoExtensionTests
     {
-        const string GoodFile = "./data/Images/test.jpg";
-        const string GoodXmlFile = "./data/Documents/DocxWord2016.docx";
-        const string GoodZipFile = "./data/Zip/images.zip";
-        const string BadFile = "./data/Images/empty.jpg";
-        const string NonexistentFile = "./data/nonexistent.jpg";
-        const string smallTxtFile = "./data/Text/SuperSmall.txt";
+        private const string GoodFile = "./data/Images/test.jpg";
+        private const string GoodXmlFile = "./data/Documents/DocxWord2016.docx";
+        private const string GoodZipFile = "./data/Zip/images.zip";
+        private const string BadFile = "./data/Images/empty.jpg";
+        private const string NonexistentFile = "./data/nonexistent.jpg";
+        private const string smallTxtFile = "./data/Text/SuperSmall.txt";
 
         //small ascii text files
-        const string oneByteFile = "./data/Text/oneCharFile.txt";
-        const string twoByteFile = "./data/Text/twoCharFile.txt";
-        const string threeByteFile = "./data/Text/threeCharFile.txt";
+        private const string oneByteFile = "./data/Text/oneCharFile.txt";
+        private const string twoByteFile = "./data/Text/twoCharFile.txt";
+        private const string threeByteFile = "./data/Text/threeCharFile.txt";
 
 
         //load from fileinfo

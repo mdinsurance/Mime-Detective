@@ -41,27 +41,31 @@ namespace MimeDetective
         public ReadResult(byte[] array, int readLength)
         {
             if (array is null)
+            {
                 ThrowHelpers.ByteArrayCannotBeNull();
+            }
 
             if ((uint)readLength > (uint)array.Length)
+            {
                 ThrowHelpers.ReadLengthCannotBeOutOfBounds();
+            }
 
-            Array = array;
-            Source = null;
-            ReadLength = readLength;
-            IsArrayRented = false;
-            ShouldDisposeStream = false;
-            ShouldResetStreamPosition = false;
+            this.Array = array;
+            this.Source = null;
+            this.ReadLength = readLength;
+            this.IsArrayRented = false;
+            this.ShouldDisposeStream = false;
+            this.ShouldResetStreamPosition = false;
         }
 
         private ReadResult(byte[] array, Stream source, int readLength, bool isArrayRented, bool shouldDisposeStream, bool shouldResetStreamPosition)
         {
-            Array = array;
-            Source = source;
-            ReadLength = readLength;
-            IsArrayRented = isArrayRented;
-            ShouldDisposeStream = shouldDisposeStream;
-            ShouldResetStreamPosition = shouldResetStreamPosition;
+            this.Array = array;
+            this.Source = source;
+            this.ReadLength = readLength;
+            this.IsArrayRented = isArrayRented;
+            this.ShouldDisposeStream = shouldDisposeStream;
+            this.ShouldResetStreamPosition = shouldResetStreamPosition;
         }
 
         /// <summary>
@@ -72,16 +76,20 @@ namespace MimeDetective
         public static ReadResult ReadFileHeader(FileInfo file)
         {
             if (file is null)
+            {
                 ThrowHelpers.FileInfoCannotBeNull();
+            }
 
             if (!file.Exists)
+            {
                 ThrowHelpers.FileDoesNotExist(file);
+            }
 
-            FileStream fileStream = file.OpenRead();
+            var fileStream = file.OpenRead();
 
-            byte[] header = ArrayPool<byte>.Shared.Rent(MimeTypes.MaxHeaderSize);
+            var header = ArrayPool<byte>.Shared.Rent(MimeTypes.MaxHeaderSize);
 
-            int bytesRead = fileStream.Read(header, 0, MimeTypes.MaxHeaderSize);
+            var bytesRead = fileStream.Read(header, 0, MimeTypes.MaxHeaderSize);
 
             return new ReadResult(header, fileStream, bytesRead, isArrayRented: true, shouldDisposeStream: true, shouldResetStreamPosition: false);
         }
@@ -89,16 +97,20 @@ namespace MimeDetective
         public static async Task<ReadResult> ReadFileHeaderAsync(FileInfo file)
         {
             if (file is null)
+            {
                 ThrowHelpers.FileInfoCannotBeNull();
+            }
 
             if (!file.Exists)
+            {
                 ThrowHelpers.FileDoesNotExist(file);
+            }
 
-            FileStream fileStream = file.OpenRead();
+            var fileStream = file.OpenRead();
 
-            byte[] header = ArrayPool<byte>.Shared.Rent(MimeTypes.MaxHeaderSize);
+            var header = ArrayPool<byte>.Shared.Rent(MimeTypes.MaxHeaderSize);
 
-            int bytesRead = await fileStream.ReadAsync(header, 0, MimeTypes.MaxHeaderSize);
+            var bytesRead = await fileStream.ReadAsync(header, 0, MimeTypes.MaxHeaderSize);
 
             return new ReadResult(header, fileStream, bytesRead, isArrayRented: true, shouldDisposeStream: true, shouldResetStreamPosition: false);
         }
@@ -112,17 +124,23 @@ namespace MimeDetective
         public static ReadResult ReadHeaderFromStream(Stream stream, bool shouldDisposeStream = false, bool shouldResetStreamPosition = true)
         {
             if (stream is null)
+            {
                 ThrowHelpers.StreamCannotBeNull();
+            }
 
             if (!stream.CanRead)
+            {
                 ThrowHelpers.CannotReadFromStream();
+            }
 
             if (stream.CanSeek && stream.Position > 0)
+            {
                 stream.Seek(0, SeekOrigin.Begin);
+            }
 
-            byte[] header = ArrayPool<byte>.Shared.Rent(MimeTypes.MaxHeaderSize);
+            var header = ArrayPool<byte>.Shared.Rent(MimeTypes.MaxHeaderSize);
 
-            int bytesRead = stream.Read(header, 0, MimeTypes.MaxHeaderSize);
+            var bytesRead = stream.Read(header, 0, MimeTypes.MaxHeaderSize);
 
             return new ReadResult(header, stream, bytesRead, isArrayRented: true, shouldDisposeStream, shouldResetStreamPosition);
         }
@@ -137,33 +155,45 @@ namespace MimeDetective
         public static async Task<ReadResult> ReadHeaderFromStreamAsync(Stream stream, bool shouldDisposeStream = false, bool shouldResetStreamPosition = true)
         {
             if (stream is null)
+            {
                 ThrowHelpers.StreamCannotBeNull();
+            }
 
             if (!stream.CanRead)
+            {
                 ThrowHelpers.CannotReadFromStream();
+            }
 
             if (stream.CanSeek && stream.Position > 0)
+            {
                 stream.Seek(0, SeekOrigin.Begin);
+            }
 
-            byte[] header = ArrayPool<byte>.Shared.Rent(MimeTypes.MaxHeaderSize);
+            var header = ArrayPool<byte>.Shared.Rent(MimeTypes.MaxHeaderSize);
 
-            int bytesRead = await stream.ReadAsync(header, 0, MimeTypes.MaxHeaderSize);
+            var bytesRead = await stream.ReadAsync(header, 0, MimeTypes.MaxHeaderSize);
 
             return new ReadResult(header, stream, bytesRead, isArrayRented: true, shouldDisposeStream, shouldResetStreamPosition);
         }
 
         public void Dispose()
         {
-            bool sourceIsNotNull = !(Source is null);
+            var sourceIsNotNull = !(this.Source is null);
 
-            if (sourceIsNotNull && ShouldResetStreamPosition && Source.CanSeek)
-                Source.Seek(0, SeekOrigin.Begin);
+            if (sourceIsNotNull && this.ShouldResetStreamPosition && this.Source.CanSeek)
+            {
+                this.Source.Seek(0, SeekOrigin.Begin);
+            }
 
-            if (sourceIsNotNull && ShouldDisposeStream)
-                Source.Dispose();
+            if (sourceIsNotNull && this.ShouldDisposeStream)
+            {
+                this.Source.Dispose();
+            }
 
-            if (IsArrayRented)
-                ArrayPool<byte>.Shared.Return(Array);
+            if (this.IsArrayRented)
+            {
+                ArrayPool<byte>.Shared.Return(this.Array);
+            }
         }
     }
 }

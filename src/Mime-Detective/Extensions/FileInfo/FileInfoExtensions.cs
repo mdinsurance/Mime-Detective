@@ -16,7 +16,7 @@ namespace MimeDetective
         /// <returns>FileType or null (for no match)</returns>
         public static FileType GetFileType(this FileInfo file, string mimeHint = null, string extensionHint = null)
         {
-            using (ReadResult readResult = ReadResult.ReadFileHeader(file))
+            using (var readResult = ReadResult.ReadFileHeader(file))
             {
                 return MimeAnalyzers.GetFileType(in readResult, mimeHint, extensionHint);
             }
@@ -32,7 +32,7 @@ namespace MimeDetective
         /// <returns>FileType or null (for no match)</returns>
         public static async Task<FileType> GetFileTypeAsync(this FileInfo file, string mimeHint = null, string extensionHint = null)
         {
-            using (ReadResult readResult = await ReadResult.ReadFileHeaderAsync(file))
+            using (var readResult = await ReadResult.ReadFileHeaderAsync(file))
             {
                 return MimeAnalyzers.GetFileType(in readResult, mimeHint, extensionHint);
             }
@@ -48,7 +48,7 @@ namespace MimeDetective
         /// </returns>
         public static bool IsFileOfTypes(this FileInfo file, List<FileType> requiredTypes)
         {
-            FileType currentType = file.GetFileType();
+            var currentType = file.GetFileType();
 
             //TODO Write a test to check if this null check is correct
             if (currentType.Mime == null)
@@ -70,7 +70,7 @@ namespace MimeDetective
         /// </returns>
         public static bool IsFileOfTypes(this FileInfo file, string CSV)
         {
-            List<FileType> providedTypes = MimeTypes.GetFileTypesByExtensions(CSV);
+            var providedTypes = MimeTypes.GetFileTypesByExtensions(CSV);
 
             return file.IsFileOfTypes(providedTypes);
         }
@@ -85,7 +85,7 @@ namespace MimeDetective
         /// </returns>
         public static bool IsType(this FileInfo file, FileType type)
         {
-            FileType actualType = GetFileType(file);
+            var actualType = GetFileType(file);
 
             //TODO Write a test to check if this null check is correct
             if (actualType.Mime is null)

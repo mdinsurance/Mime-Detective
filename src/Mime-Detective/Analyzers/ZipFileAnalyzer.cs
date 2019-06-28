@@ -19,7 +19,7 @@ namespace MimeDetective.Analyzers
         /// <returns>Any resulting match or <see cref="MimeTypes.ZIP"/> for no match</returns>
         public FileType Search(in ReadResult readResult, string mimeHint = null, string extensionHint = null)
         {
-            bool locallyCreatedStream = false;
+            var locallyCreatedStream = false;
             Stream mStream = null;
 
             if (readResult.Source is null)
@@ -34,25 +34,33 @@ namespace MimeDetective.Analyzers
             }
 
             if (mStream.CanSeek && mStream.Position > 0)
+            {
                 mStream.Seek(0, SeekOrigin.Begin);
+            }
 
-            using (ZipArchive zipData = new ZipArchive(mStream, ZipArchiveMode.Read, leaveOpen: true))
+            using (var zipData = new ZipArchive(mStream, ZipArchiveMode.Read, leaveOpen: true))
             {
                 //check for office xml formats
-                FileType officeXml = CheckForOpenXMLDocument(zipData);
+                var officeXml = this.CheckForOpenXMLDocument(zipData);
 
                 if (officeXml != null)
+                {
                     return officeXml;
+                }
 
                 //check for open office formats
-                FileType openOffice = CheckForOpenDocument(zipData);
+                var openOffice = this.CheckForOpenDocument(zipData);
 
                 if (openOffice != null)
+                {
                     return openOffice;
+                }
             }
 
             if (locallyCreatedStream)
+            {
                 mStream.Dispose();
+            }
 
             if (!(mimeHint is null) || !(extensionHint is null))
             {
@@ -64,19 +72,19 @@ namespace MimeDetective.Analyzers
 
         public FileType CheckForOpenXMLDocument(ZipArchive zipData)
         {
-            System.Collections.Generic.List<string> entryFullNames = zipData.Entries.Select(e => e.FullName).ToList();
+            var entryFullNames = zipData.Entries.Select(e => e.FullName).ToList();
 
-            foreach (string entry in entryFullNames)
+            foreach (var entry in entryFullNames)
             {
                 if (entry.StartsWith("word/"))
                 {
-                    using (Stream s = zipData.Entries.Single(x => x.FullName == "[Content_Types].xml").Open())
+                    using (var s = zipData.Entries.Single(x => x.FullName == "[Content_Types].xml").Open())
                     {
-                        using (XmlReader reader = XmlReader.Create(s))
+                        using (var reader = XmlReader.Create(s))
                         {
-                            XDocument doc = XDocument.Load(reader);
+                            var doc = XDocument.Load(reader);
 
-                            string contentType = doc.Descendants().Where(d => d.Name.LocalName == "Override")
+                            var contentType = doc.Descendants().Where(d => d.Name.LocalName == "Override")
                                 .Where(x => x.Attribute("PartName").Value == "/word/document.xml")
                                 .Attributes("ContentType").Single().Value;
 
@@ -96,13 +104,13 @@ namespace MimeDetective.Analyzers
                         return MimeTypes.EXCELB;
                     }
 
-                    using (Stream s = zipData.Entries.Single(x => x.FullName == "[Content_Types].xml").Open())
+                    using (var s = zipData.Entries.Single(x => x.FullName == "[Content_Types].xml").Open())
                     {
-                        using (XmlReader reader = XmlReader.Create(s))
+                        using (var reader = XmlReader.Create(s))
                         {
-                            XDocument doc = XDocument.Load(reader);
+                            var doc = XDocument.Load(reader);
 
-                            string contentType = doc.Descendants().Where(d => d.Name.LocalName == "Override")
+                            var contentType = doc.Descendants().Where(d => d.Name.LocalName == "Override")
                                 .Where(x => x.Attribute("PartName").Value == "/xl/workbook.xml")
                                 .Attributes("ContentType").Single().Value;
 
@@ -129,7 +137,7 @@ namespace MimeDetective.Analyzers
         {
             ZipArchiveEntry ooMimeType = null;
 
-            foreach (ZipArchiveEntry entry in zipFile.Entries)
+            foreach (var entry in zipFile.Entries)
             {
                 if (entry.FullName == "mimetype")
                 {
@@ -139,22 +147,34 @@ namespace MimeDetective.Analyzers
             }
 
             if (ooMimeType is null)
-                return null;
-
-            using (StreamReader textReader = new StreamReader(ooMimeType.Open()))
             {
-                string mimeType = textReader.ReadToEnd();
+                return null;
+            }
+
+            using (var textReader = new StreamReader(ooMimeType.Open()))
+            {
+                var mimeType = textReader.ReadToEnd();
 
                 if (mimeType == MimeTypes.ODT.Mime)
+                {
                     return MimeTypes.ODT;
+                }
                 else if (mimeType == MimeTypes.ODS.Mime)
+                {
                     return MimeTypes.ODS;
+                }
                 else if (mimeType == MimeTypes.ODP.Mime)
+                {
                     return MimeTypes.ODP;
+                }
                 else if (mimeType == MimeTypes.ODG.Mime)
+                {
                     return MimeTypes.ODG;
+                }
                 else
+                {
                     return null;
+                }
             }
         }
     }

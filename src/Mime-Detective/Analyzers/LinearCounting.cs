@@ -26,10 +26,12 @@ namespace MimeDetective.Analyzers
                 ThrowHelpers.FileTypeEnumerableIsNull();
             }
 
-            foreach (FileType fileType in fileTypes)
+            foreach (var fileType in fileTypes)
             {
                 if (!(fileType is null))
-                    Insert(fileType);
+                {
+                    this.Insert(fileType);
+                }
             }
 
             //types.OrderBy(x => x.HeaderOffset);
@@ -41,18 +43,20 @@ namespace MimeDetective.Analyzers
         public void Insert(FileType fileType)
         {
             if (fileType is null)
-                ThrowHelpers.FileTypeArgumentIsNull();
-
-            if (typesLength >= types.Length)
             {
-                int newTypesCount = types.Length * 2;
-                FileType[] newTypes = new FileType[newTypesCount];
-                Array.Copy(types, newTypes, typesLength);
-                types = newTypes;
+                ThrowHelpers.FileTypeArgumentIsNull();
             }
 
-            types[typesLength] = fileType;
-            typesLength++;
+            if (this.typesLength >= this.types.Length)
+            {
+                var newTypesCount = this.types.Length * 2;
+                var newTypes = new FileType[newTypesCount];
+                Array.Copy(this.types, newTypes, this.typesLength);
+                this.types = newTypes;
+            }
+
+            this.types[this.typesLength] = fileType;
+            this.typesLength++;
         }
 
         public FileType Search(in ReadResult readResult, string mimeHint = null, string extensionHint = null)
@@ -61,17 +65,21 @@ namespace MimeDetective.Analyzers
             FileType highestMatchingType = null;
 
             // compare the file header to the stored file headers
-            for (int typeIndex = 0; typeIndex < typesLength; typeIndex++)
+            for (var typeIndex = 0; typeIndex < this.typesLength; typeIndex++)
             {
-                FileType type = types[typeIndex];
+                var type = this.types[typeIndex];
                 uint matchingCount = 0;
 
                 for (int i = 0, iOffset = type.HeaderOffset; iOffset < readResult.ReadLength && i < type.Header.Length; i++, iOffset++)
                 {
                     if (type.Header[i] is null || type.Header[i].Value == readResult.Array[iOffset])
+                    {
                         matchingCount++;
+                    }
                     else
+                    {
                         break;
+                    }
                 }
 
                 //TODO should this be default behavior?

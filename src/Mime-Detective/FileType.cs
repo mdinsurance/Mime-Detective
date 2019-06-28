@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Diagnostics;
-using System.Runtime.InteropServices;
 
 namespace MimeDetective
 {
@@ -29,40 +28,53 @@ namespace MimeDetective
         /// <param name="mime">The description of MIME.</param>
         public FileType(byte?[] header, string extension, string mime, ushort offset = 0)
         {
-            Header = header ?? throw new ArgumentNullException(nameof(header), $"cannot be null, {nameof(FileType)} needs file header data");
+            this.Header = header ?? throw new ArgumentNullException(nameof(header), $"cannot be null, {nameof(FileType)} needs file header data");
 
             if (offset > (MimeTypes.MaxHeaderSize - 1))
+            {
                 throw new ArgumentException($"Header Offset cannot exceed Max Header Size {MimeTypes.MaxHeaderSize} - 1");
+            }
 
-            HeaderOffset = offset;
-            Extension = extension;
-            Mime = mime;
+            this.HeaderOffset = offset;
+            this.Extension = extension;
+            this.Mime = mime;
         }
 
-        public static bool operator == (FileType a, FileType b)
+        public static bool operator ==(FileType a, FileType b)
         {
             if (a is null && b is null)
+            {
                 return true;
+            }
 
             if (b is null)
+            {
                 return a.Equals(b);
-            
+            }
+
             return b.Equals(a);
         }
 
-        public static bool operator !=(FileType a, FileType b) => !(a == b);
+        public static bool operator !=(FileType a, FileType b)
+        {
+            return !(a == b);
+        }
 
         public override bool Equals(object other)
         {
             if (other is null)
+            {
                 return false;
+            }
 
             if (other is FileType type
-                && HeaderOffset == type.HeaderOffset
-                && Extension.Equals(type.Extension)
-                && Mime.Equals(type.Mime)
-                && CompareHeaders(Header, type.Header))
-                    return true;
+                && this.HeaderOffset == type.HeaderOffset
+                && this.Extension.Equals(type.Extension)
+                && this.Mime.Equals(type.Mime)
+                && CompareHeaders(this.Header, type.Header))
+            {
+                return true;
+            }
 
             return false;
         }
@@ -70,13 +82,17 @@ namespace MimeDetective
         public bool Equals(FileType other)
         {
             if (other is null)
+            {
                 return false;
+            }
 
-            if (HeaderOffset == other.HeaderOffset
-                && Extension.Equals(other.Extension)
-                && Mime.Equals(other.Mime)
-                && CompareHeaders(Header, other.Header))
+            if (this.HeaderOffset == other.HeaderOffset
+                && this.Extension.Equals(other.Extension)
+                && this.Mime.Equals(other.Mime)
+                && CompareHeaders(this.Header, other.Header))
+            {
                 return true;
+            }
 
             return false;
         }
@@ -84,17 +100,23 @@ namespace MimeDetective
         private static bool CompareHeaders(byte?[] array1, byte?[] array2)
         {
             if (array1.Length != array2.Length)
+            {
                 return false;
+            }
 
-            for (int i = 0; i < array1.Length; i++)
+            for (var i = 0; i < array1.Length; i++)
+            {
                 if (array1[i] != array2[i])
+                {
                     return false;
+                }
+            }
 
             return true;
         }
 
-        public override int GetHashCode() => (base.GetHashCode() ^ Header.GetHashCode() ^ HeaderOffset ^ Extension.GetHashCode() ^ Mime.GetHashCode());
+        public override int GetHashCode() => (base.GetHashCode() ^ this.Header.GetHashCode() ^ this.HeaderOffset ^ this.Extension.GetHashCode() ^ this.Mime.GetHashCode());
 
-        public override string ToString() => Extension;
+        public override string ToString() => this.Extension;
     }
 }

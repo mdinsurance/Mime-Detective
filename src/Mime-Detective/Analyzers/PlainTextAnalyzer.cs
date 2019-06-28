@@ -11,7 +11,7 @@ namespace MimeDetective.Analyzers
 
         public FileType Search(in ReadResult readResult, string mimeHint = null, string extensionHint = null)
         {
-            bool locallyCreatedStream = false;
+            var locallyCreatedStream = false;
             Stream mStream = null;
 
             if (readResult.Source is null)
@@ -26,39 +26,54 @@ namespace MimeDetective.Analyzers
             }
 
             if (mStream.CanSeek && mStream.Position > 0)
-                mStream.Seek(0, SeekOrigin.Begin);
-
-            bool isNotCsv = false;
-            using (StreamReader reader = new StreamReader(mStream, System.Text.Encoding.UTF8))
             {
-                int commaCount = 0;
-                string line = reader.ReadLine();
-                if (string.IsNullOrWhiteSpace(line))
-                {
-                    return MimeTypes.TXT;
-                }
+                mStream.Seek(0, SeekOrigin.Begin);
+            }
 
-                do
+            var isNotCsv = false;
+            using (var streamCopy = new MemoryStream())
+            {
+                mStream.CopyTo(streamCopy);
+                mStream.Seek(0, SeekOrigin.Begin);
+                streamCopy.Seek(0, SeekOrigin.Begin);
+                using (var reader = new StreamReader(streamCopy, System.Text.Encoding.UTF8))
                 {
-                    int count = line.Count(x => char.Equals(x, ','));
-                    if (count == 0)
+                    var commaCount = 0;
+                    var line = reader.ReadLine();
+                    if (string.IsNullOrWhiteSpace(line))
                     {
                         isNotCsv = true;
                     }
-                    if (commaCount == 0)
+
+                    if (isNotCsv == false)
                     {
-                        commaCount = count;
+                        do
+                        {
+                            var count = line.Count(x => char.Equals(x, ','));
+                            if (count == 0)
+                            {
+                                isNotCsv = true;
+                                break;
+                            }
+                            if (commaCount == 0)
+                            {
+                                commaCount = count;
+                            }
+                            if (commaCount != count)
+                            {
+                                isNotCsv = true;
+                                break;
+                            }
+                            line = reader.ReadLine();
+                        } while (string.IsNullOrWhiteSpace(line) == false && isNotCsv == false);
                     }
-                    if (commaCount != count)
-                    {
-                        isNotCsv = true;
-                    }
-                    line = reader.ReadLine();
-                } while (string.IsNullOrWhiteSpace(line) == false && isNotCsv == false);
+                }
             }
 
             if (locallyCreatedStream)
+            {
                 mStream.Dispose();
+            }
 
             if (isNotCsv)
             {

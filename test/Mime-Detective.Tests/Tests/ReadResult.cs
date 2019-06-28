@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Buffers;
-using System.Collections.Generic;
 using System.IO;
-using System.Text;
 using System.Threading.Tasks;
 using Xunit;
 
@@ -17,7 +15,7 @@ namespace MimeDetective.Tests
         [InlineData(1024, 560)]
         public void CreateFromArray(int arraySize, int readLength)
         {
-            ReadResult readResult = new ReadResult(new byte[arraySize], readLength);
+            var readResult = new ReadResult(new byte[arraySize], readLength);
 
             Assert.NotNull(readResult.Array);
             Assert.NotEmpty(readResult.Array);
@@ -30,38 +28,32 @@ namespace MimeDetective.Tests
         }
 
         [Fact]
-        public void CreateFromNullArrayThrows()
-        {
-            Assert.Throws<ArgumentNullException>(() => new ReadResult(null, 560));
-        }
+        public void CreateFromNullArrayThrows() => Assert.Throws<ArgumentNullException>(() => new ReadResult(null, 560));
 
         [Theory]
         [InlineData(-1)]
         [InlineData(-10)]
         [InlineData(561)]
         [InlineData(1024)]
-        public void CreateFromArrayReadLengthOutOfBoundsThrows(int readLength)
-        {
-            Assert.Throws<ArgumentOutOfRangeException>(() => new ReadResult(new byte[560], readLength));
-        }
+        public void CreateFromArrayReadLengthOutOfBoundsThrows(int readLength) => Assert.Throws<ArgumentOutOfRangeException>(() => new ReadResult(new byte[560], readLength));
 
         [Fact]
         public void CreateFromArrayDispose()
         {
-            ReadResult readResult = new ReadResult(new byte[560], 560);
+            var readResult = new ReadResult(new byte[560], 560);
 
             readResult.Dispose();
 
             Assert.Throws<ArgumentException>(() => ArrayPool<byte>.Shared.Return(readResult.Array));
         }
 
-        public const String testFile = "./Data/Images/test.jpg";
-        public const String nonExistingFile = "./Data/Images/supertest.jpg";
+        public const string testFile = "./Data/Images/test.jpg";
+        public const string nonExistingFile = "./Data/Images/supertest.jpg";
 
         [Fact]
         public void CreateFromFile()
         {
-            ReadResult readResult = ReadResult.ReadFileHeader(new FileInfo(testFile));
+            var readResult = ReadResult.ReadFileHeader(new FileInfo(testFile));
             Assert.NotNull(readResult.Array);
             Assert.NotNull(readResult.Source);
             Assert.InRange(readResult.ReadLength, 1, readResult.Array.Length);
@@ -73,7 +65,7 @@ namespace MimeDetective.Tests
         [Fact]
         public async Task CreateFromFileAsync()
         {
-            ReadResult readResultAsync = await ReadResult.ReadFileHeaderAsync(new FileInfo(testFile));
+            var readResultAsync = await ReadResult.ReadFileHeaderAsync(new FileInfo(testFile));
             Assert.NotNull(readResultAsync.Array);
             Assert.NotNull(readResultAsync.Source);
             Assert.InRange(readResultAsync.ReadLength, 1, readResultAsync.Array.Length);
@@ -99,7 +91,7 @@ namespace MimeDetective.Tests
         [Fact]
         public void CreateFromFileDispose()
         {
-            ReadResult readResult = ReadResult.ReadFileHeader(new FileInfo(testFile));
+            var readResult = ReadResult.ReadFileHeader(new FileInfo(testFile));
             readResult.Dispose();
 
             Assert.Throws<ObjectDisposedException>(() => readResult.Source.ReadByte());
@@ -108,7 +100,7 @@ namespace MimeDetective.Tests
         [Fact]
         public async Task CreateFromFileDisposeAsync()
         {
-            ReadResult readResult = await ReadResult.ReadFileHeaderAsync(new FileInfo(testFile));
+            var readResult = await ReadResult.ReadFileHeaderAsync(new FileInfo(testFile));
             readResult.Dispose();
 
             Assert.Throws<ObjectDisposedException>(() => readResult.Source.ReadByte());
@@ -121,11 +113,11 @@ namespace MimeDetective.Tests
         [InlineData(false, false)]
         public void CreateFromStream(bool shouldDisposeStream, bool resetStreamPos)
         {
-            FileInfo file = new FileInfo(testFile);
+            var file = new FileInfo(testFile);
 
-            using (FileStream stream = file.OpenRead())
+            using (var stream = file.OpenRead())
             {
-                ReadResult readResult = ReadResult.ReadHeaderFromStream(stream, shouldDisposeStream, resetStreamPos);
+                var readResult = ReadResult.ReadHeaderFromStream(stream, shouldDisposeStream, resetStreamPos);
                 Assert.NotNull(readResult.Array);
                 Assert.NotNull(readResult.Source);
                 Assert.InRange(readResult.ReadLength, 1, readResult.Array.Length);
@@ -142,11 +134,11 @@ namespace MimeDetective.Tests
         [InlineData(false, false)]
         public async Task CreateFromStreamAsync(bool shouldDisposeStream, bool resetStreamPos)
         {
-            FileInfo file = new FileInfo(testFile);
+            var file = new FileInfo(testFile);
 
-            using (FileStream stream = file.OpenRead())
+            using (var stream = file.OpenRead())
             {
-                ReadResult readResult = await ReadResult.ReadHeaderFromStreamAsync(stream, shouldDisposeStream, resetStreamPos);
+                var readResult = await ReadResult.ReadHeaderFromStreamAsync(stream, shouldDisposeStream, resetStreamPos);
                 Assert.NotNull(readResult.Array);
                 Assert.NotNull(readResult.Source);
                 Assert.InRange(readResult.ReadLength, 1, readResult.Array.Length);
@@ -177,13 +169,13 @@ namespace MimeDetective.Tests
         public void CreateFromStreamDispose()
         {
             Stream stream = new FileInfo(testFile).OpenRead();
-            ReadResult readResult = ReadResult.ReadHeaderFromStream(stream);
+            var readResult = ReadResult.ReadHeaderFromStream(stream);
 
             readResult.Dispose();
 
             Assert.StrictEqual(0, readResult.Source.Position);
 
-            int testRead = readResult.Source.ReadByte();
+            var testRead = readResult.Source.ReadByte();
             readResult.Source.Dispose();
         }
 
@@ -191,7 +183,7 @@ namespace MimeDetective.Tests
         public void CreateFromStreamDisposeShouldDisposeStream()
         {
             Stream stream = new FileInfo(testFile).OpenRead();
-            ReadResult readResult = ReadResult.ReadHeaderFromStream(stream, shouldDisposeStream: true);
+            var readResult = ReadResult.ReadHeaderFromStream(stream, shouldDisposeStream: true);
 
             readResult.Dispose();
 
@@ -202,13 +194,13 @@ namespace MimeDetective.Tests
         public async Task CreateFromStreamDisposeAsync()
         {
             Stream stream = new FileInfo(testFile).OpenRead();
-            ReadResult readResult = await ReadResult.ReadHeaderFromStreamAsync(stream);
+            var readResult = await ReadResult.ReadHeaderFromStreamAsync(stream);
 
             readResult.Dispose();
 
             Assert.StrictEqual(0, readResult.Source.Position);
 
-            int testRead = readResult.Source.ReadByte();
+            var testRead = readResult.Source.ReadByte();
             readResult.Source.Dispose();
         }
 
@@ -216,7 +208,7 @@ namespace MimeDetective.Tests
         public async Task CreateFromStreamAsyncDisposeShouldDisposeStream()
         {
             Stream stream = new FileInfo(testFile).OpenRead();
-            ReadResult readResult = await ReadResult.ReadHeaderFromStreamAsync(stream, shouldDisposeStream: true);
+            var readResult = await ReadResult.ReadHeaderFromStreamAsync(stream, shouldDisposeStream: true);
 
             readResult.Dispose();
 

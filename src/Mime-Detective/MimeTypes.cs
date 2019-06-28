@@ -282,12 +282,14 @@ namespace MimeDetective
         /// <returns>List of FileTypes</returns>
         public static List<FileType> GetFileTypesByExtensions(string csv)
         {
-            List<FileType> result = new List<FileType>();
+            var result = new List<FileType>();
 
-            foreach (FileType type in Types)
+            foreach (var type in Types)
             {
                 if (csv.IndexOf(type.Extension, 0, StringComparison.OrdinalIgnoreCase) > 0)
+                {
                     result.Add(type);
+                }
             }
 
             return result;

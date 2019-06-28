@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using Xunit;
 using static MimeDetective.Utilities.TypeComparisions;
 
@@ -9,7 +6,7 @@ namespace MimeDetective.Tests.Assemblies
 {
     public class WindowsFormats
     {
-        public const String AssembliesPath = "./Data/Assemblies";
+        public const string AssembliesPath = "./Data/Assemblies";
 
         [Theory]
         [InlineData("ManagedExe.exe")]

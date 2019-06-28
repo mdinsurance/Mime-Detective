@@ -11,12 +11,12 @@
 
         public MsOfficeAnalyzer()
         {
-            dictTrie = new DictionaryTrie(MsDocTypes);
+            this.dictTrie = new DictionaryTrie(MsDocTypes);
         }
 
         public FileType Search(in ReadResult readResult, string mimeHint = null, string extensionHint = null)
         {
-            FileType result = dictTrie.Search(in readResult);
+            var result = this.dictTrie.Search(in readResult);
             if (result == null || result == MimeTypes.UNKNOWN)
             {
                 return MimeTypes.MS_OFFICE;

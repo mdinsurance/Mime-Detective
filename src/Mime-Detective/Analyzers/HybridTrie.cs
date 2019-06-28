@@ -19,8 +19,8 @@ namespace MimeDetective.Analyzers
 
             public OffsetNode(ushort offset)
             {
-                Offset = offset;
-                Children = new Node[MaxNodeSize];
+                this.Offset = offset;
+                this.Children = new Node[MaxNodeSize];
             }
         }
 
@@ -29,7 +29,7 @@ namespace MimeDetective.Analyzers
         /// </summary>
         public HybridTrie()
         {
-            OffsetNodes[0] = new OffsetNode(0);
+            this.OffsetNodes[0] = new OffsetNode(0);
         }
 
         /// <summary>
@@ -39,40 +39,48 @@ namespace MimeDetective.Analyzers
         public HybridTrie(IEnumerable<FileType> types)
         {
             if (types is null)
+            {
                 ThrowHelpers.FileTypeArgumentIsNull();
+            }
 
-            OffsetNodes[0] = new OffsetNode(0);
+            this.OffsetNodes[0] = new OffsetNode(0);
 
-            foreach (FileType type in types)
+            foreach (var type in types)
             {
                 if (!(type is null))
-                    Insert(type);
+                {
+                    this.Insert(type);
+                }
             }
         }
 
         public FileType Search(in ReadResult readResult, string mimeHint = null, string extensionHint = null)
         {
             FileType match = null;
-            int highestMatchingCount = 0;
+            var highestMatchingCount = 0;
 
             //iterate through offset nodes
-            for (int offsetNodeIndex = 0; offsetNodeIndex < offsetNodesLength; offsetNodeIndex++)
+            for (var offsetNodeIndex = 0; offsetNodeIndex < this.offsetNodesLength; offsetNodeIndex++)
             {
                 //get offset node
-                OffsetNode offsetNode = OffsetNodes[offsetNodeIndex];
+                var offsetNode = this.OffsetNodes[offsetNodeIndex];
                 int i = offsetNode.Offset;
 
                 if (!(i < readResult.ReadLength))
+                {
                     continue;
+                }
 
-                Node node = offsetNode.Children[readResult.Array[i]];
+                var node = offsetNode.Children[readResult.Array[i]];
 
                 if (node == null)
                 {
                     node = offsetNode.Children[NullStandInValue];
 
                     if (node is null)
+                    {
                         continue;
+                    }
                 }
 
                 i++;
@@ -85,7 +93,7 @@ namespace MimeDetective.Analyzers
 
                 while (i < readResult.ReadLength)
                 {
-                    Node prevNode = node;
+                    var prevNode = node;
 
                     if (!prevNode.TryGetValue(readResult.Array[i], out node)
                         && !prevNode.TryGetValue(NullStandInValue, out node))
@@ -109,14 +117,16 @@ namespace MimeDetective.Analyzers
         public void Insert(FileType type)
         {
             if (type is null)
-                ThrowHelpers.FileTypeArgumentIsNull();
-
-            ref OffsetNode match = ref OffsetNodes[0];
-            bool matchFound = false;
-
-            for (int offsetNodeIndex = 0; offsetNodeIndex < offsetNodesLength; offsetNodeIndex++)
             {
-                ref OffsetNode currentNode = ref OffsetNodes[offsetNodeIndex];
+                ThrowHelpers.FileTypeArgumentIsNull();
+            }
+
+            ref OffsetNode match = ref this.OffsetNodes[0];
+            var matchFound = false;
+
+            for (var offsetNodeIndex = 0; offsetNodeIndex < this.offsetNodesLength; offsetNodeIndex++)
+            {
+                ref OffsetNode currentNode = ref this.OffsetNodes[offsetNodeIndex];
 
                 if (currentNode.Offset == type.HeaderOffset)
                 {
@@ -129,25 +139,25 @@ namespace MimeDetective.Analyzers
             //handle expanding collection
             if (!matchFound)
             {
-                if (offsetNodesLength >= OffsetNodes.Length)
+                if (this.offsetNodesLength >= this.OffsetNodes.Length)
                 {
-                    int newOffsetNodeCalc = OffsetNodes.Length * 2;
-                    int newOffsetNodeCount = newOffsetNodeCalc > 560 ? 560 : newOffsetNodeCalc;
-                    OffsetNode[] newOffsetNodes = new OffsetNode[newOffsetNodeCount];
-                    Array.Copy(OffsetNodes, newOffsetNodes, offsetNodesLength);
-                    OffsetNodes = newOffsetNodes;
+                    var newOffsetNodeCalc = this.OffsetNodes.Length * 2;
+                    var newOffsetNodeCount = newOffsetNodeCalc > 560 ? 560 : newOffsetNodeCalc;
+                    var newOffsetNodes = new OffsetNode[newOffsetNodeCount];
+                    Array.Copy(this.OffsetNodes, newOffsetNodes, this.offsetNodesLength);
+                    this.OffsetNodes = newOffsetNodes;
                 }
 
-                match = ref OffsetNodes[offsetNodesLength];
+                match = ref this.OffsetNodes[this.offsetNodesLength];
                 match = new OffsetNode(type.HeaderOffset);
-                offsetNodesLength++;
+                this.offsetNodesLength++;
             }
 
-            int i = 0;
-            byte? value = type.Header[i];
+            var i = 0;
+            var value = type.Header[i];
             int arrayPos = value ?? NullStandInValue;
 
-            Node node = match.Children[arrayPos];
+            var node = match.Children[arrayPos];
 
             if (node is null)
             {
@@ -161,7 +171,7 @@ namespace MimeDetective.Analyzers
             {
                 value = type.Header[i];
                 arrayPos = value ?? NullStandInValue;
-                Node prevNode = node;
+                var prevNode = node;
 
                 if (!node.TryGetValue((ushort)arrayPos, out node))
                 {
@@ -197,13 +207,13 @@ namespace MimeDetective.Analyzers
 
             public Node(ushort value)
             {
-                Value = value;
-                Clear(DefaultSize);
+                this.Value = value;
+                this.Clear(DefaultSize);
             }
 
             public bool TryGetValue(ushort key, out Node value)
             {
-                Entry entry = Find(key);
+                var entry = this.Find(key);
 
                 if (entry != null)
                 {
@@ -217,28 +227,32 @@ namespace MimeDetective.Analyzers
 
             public void Add(ushort key, Node value)
             {
-                Entry entry = Find(key);
+                var entry = this.Find(key);
 
                 if (entry != null)
+                {
                     throw new ArgumentException("entry already added");
+                }
 
-                UncheckedAdd(key, value);
+                this.UncheckedAdd(key, value);
             }
 
             public void Clear(int capacity = DefaultSize)
             {
-                _buckets = new Entry[capacity];
-                _numEntries = 0;
+                this._buckets = new Entry[capacity];
+                this._numEntries = 0;
             }
 
             private Entry Find(ushort key)
             {
-                int bucket = GetBucket(key);
-                Entry entry = _buckets[bucket];
+                var bucket = this.GetBucket(key);
+                var entry = this._buckets[bucket];
                 while (entry != null)
                 {
                     if (key == entry._value.Value)
+                    {
                         return entry;
+                    }
 
                     entry = entry._next;
                 }
@@ -247,48 +261,50 @@ namespace MimeDetective.Analyzers
 
             private Entry UncheckedAdd(ushort key, Node value)
             {
-                Entry entry = new Entry
+                var entry = new Entry
                 {
                     _value = value
                 };
 
-                int bucket = GetBucket(key);
-                entry._next = _buckets[bucket];
-                _buckets[bucket] = entry;
+                var bucket = this.GetBucket(key);
+                entry._next = this._buckets[bucket];
+                this._buckets[bucket] = entry;
 
-                _numEntries++;
-                if (_numEntries > (_buckets.Length * 2))
-                    ExpandBuckets();
+                this._numEntries++;
+                if (this._numEntries > (this._buckets.Length * 2))
+                {
+                    this.ExpandBuckets();
+                }
 
                 return entry;
             }
 
             private void ExpandBuckets()
             {
-                int newNumBuckets = _buckets.Length * 2 + 1;
-                Entry[] newBuckets = new Entry[newNumBuckets];
-                for (int i = 0; i < _buckets.Length; i++)
+                var newNumBuckets = this._buckets.Length * 2 + 1;
+                var newBuckets = new Entry[newNumBuckets];
+                for (var i = 0; i < this._buckets.Length; i++)
                 {
-                    Entry entry = _buckets[i];
+                    var entry = this._buckets[i];
                     while (entry != null)
                     {
-                        Entry nextEntry = entry._next;
+                        var nextEntry = entry._next;
 
-                        int bucket = GetBucket(entry._value.Value, newNumBuckets);
+                        var bucket = this.GetBucket(entry._value.Value, newNumBuckets);
                         entry._next = newBuckets[bucket];
                         newBuckets[bucket] = entry;
 
                         entry = nextEntry;
                     }
                 }
-                _buckets = newBuckets;
+                this._buckets = newBuckets;
             }
 
             private int GetBucket(ushort key, int numBuckets = 0)
             {
                 int h = key;
                 h &= 0x7fffffff;
-                return (h % (numBuckets == 0 ? _buckets.Length : numBuckets));
+                return (h % (numBuckets == 0 ? this._buckets.Length : numBuckets));
             }
         }
     }

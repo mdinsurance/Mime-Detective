@@ -1,11 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.IO;
 using System.Threading.Tasks;
-using MimeDetective;
 using Xunit;
-using System.IO;
-using MimeDetective.Utilities;
 
 namespace MimeDetective.Tests.Text
 {

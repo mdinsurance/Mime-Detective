@@ -1,12 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using MimeDetective.Utilities;
+using System.IO;
 using System.Threading.Tasks;
 using Xunit;
-using System.IO;
-using MimeDetective;
-using MimeDetective.Extensions;
-using MimeDetective.Utilities;
 
 namespace MimeDetective.Tests.Images
 {

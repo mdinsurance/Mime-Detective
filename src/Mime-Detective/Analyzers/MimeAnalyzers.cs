@@ -21,7 +21,9 @@ namespace MimeDetective
             set
             {
                 if (value is null)
+                {
                     throw new ArgumentNullException(nameof(value));
+                }
 
                 primaryAnalyzer = value;
             }
@@ -44,7 +46,7 @@ namespace MimeDetective
 
             match = PrimaryAnalyzer.Search(in readResult, mimeHint, extensionHint);
 
-            if (!(match is null) && SecondaryAnalyzers.TryGetValue(match, out IReadOnlyFileAnalyzer secondaryAnalyzer))
+            if (!(match is null) && SecondaryAnalyzers.TryGetValue(match, out var secondaryAnalyzer))
             {
                 match = secondaryAnalyzer.Search(in readResult, mimeHint, extensionHint);
             }

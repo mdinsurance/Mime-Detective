@@ -1,32 +1,25 @@
-﻿using System;
-using System.IO;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using MimeDetective;
 using MimeDetective.Extensions;
-using MimeDetective;
+using System;
+using System.IO;
+using System.Threading.Tasks;
 using Xunit;
 
 namespace MimeDetective.Tests
 {
     public class TypeExtensions
     {
-        const string GoodFile = "./data/Images/test.jpg";
-
-        const string GoodXmlFile = "./data/Documents/DocxWord2016.docx";
-
-        const string GoodZipFile = "./data/Zip/images.zip";
-
-        const string BadFile = "./data/Images/empty.jpg";
-
-        const string NonexistentFile = "./data/nonexistent.jpg";
-
-        const string smallTxtFile = "./data/Text/SuperSmall.txt";
+        private const string GoodFile = "./data/Images/test.jpg";
+        private const string GoodXmlFile = "./data/Documents/DocxWord2016.docx";
+        private const string GoodZipFile = "./data/Zip/images.zip";
+        private const string BadFile = "./data/Images/empty.jpg";
+        private const string NonexistentFile = "./data/nonexistent.jpg";
+        private const string smallTxtFile = "./data/Text/SuperSmall.txt";
 
         //small ascii text files
-        const string oneByteFile = "./data/Text/oneCharFile.txt";
-        const string twoByteFile = "./data/Text/twoCharFile.txt";
-        const string threeByteFile = "./data/Text/threeCharFile.txt";
+        private const string oneByteFile = "./data/Text/oneCharFile.txt";
+        private const string twoByteFile = "./data/Text/twoCharFile.txt";
+        private const string threeByteFile = "./data/Text/threeCharFile.txt";
 
 
         //load from fileinfo
@@ -71,9 +64,9 @@ namespace MimeDetective.Tests
         }
 
         //load from stream
-            //attempt to load from good stream
-            //attempt to load from empty stream
-            //stream shouldn't be closed
+        //attempt to load from good stream
+        //attempt to load from empty stream
+        //stream shouldn't be closed
 
         [Fact]
         public async Task FromStreamAsync()
@@ -241,7 +234,7 @@ namespace MimeDetective.Tests
             var fileInfo = new FileInfo(GoodFile);
 
             //560 is the max file header size
-            byte[] byteArray = new byte[560];
+            var byteArray = new byte[560];
 
             using (var fileStream = fileInfo.OpenRead())
             {
@@ -289,11 +282,11 @@ namespace MimeDetective.Tests
         [InlineData(threeByteFile, Skip = "Planned in text detector for 1.0.0")]
         public async Task FromSmallTxtFile(string file)
         {
-            FileInfo smallTxt = new FileInfo(file);
+            var smallTxt = new FileInfo(file);
 
             using (var stream = smallTxt.OpenRead())
             {
-                byte[] bytes = new byte[smallTxt.Length];
+                var bytes = new byte[smallTxt.Length];
 
                 await stream.ReadAsync(bytes, 0, bytes.Length);
 
