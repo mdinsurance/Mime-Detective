@@ -5,12 +5,12 @@ using Xunit;
 
 namespace MimeDetective.Tests.Analyzers
 {
-    public class MSOfficeAnalyzerTests
+    public class MicrosoftCompoundDocumentFileAnalyzerTests
     {
         [Fact]
         public void DefaultConstructor()
         {
-            var analyzer = new MsOfficeAnalyzer();
+            var analyzer = new MicrosoftCompoundDocumentFileAnalyzer();
 
             //assertion here just to have
             Assert.NotNull(analyzer);
@@ -24,7 +24,7 @@ namespace MimeDetective.Tests.Analyzers
         [InlineData("./Data/Documents/test.msg", "msg")]
         public async Task Search(string path, string ext)
         {
-            var analyzer = new MsOfficeAnalyzer();
+            var analyzer = new MicrosoftCompoundDocumentFileAnalyzer();
             var file = new FileInfo(path);
             FileType type = null;
 

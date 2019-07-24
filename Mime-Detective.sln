@@ -25,6 +25,10 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Mime-Detective", "src\Mime-
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Mime-Detective.Benchmarks", "test\Mime-Detective.Benchmarks\Mime-Detective.Benchmarks.csproj", "{7F622459-3B42-4393-A08D-BEB47432628A}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "assist", "assist", "{231EF7BF-5CF0-45D3-BB24-8FF5E1381EDC}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mime-Detective.Scratch", "Mime-Detective.Scratch\Mime-Detective.Scratch.csproj", "{691D70EC-2488-4E24-85B4-418AB1728010}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -43,6 +47,10 @@ Global
 		{7F622459-3B42-4393-A08D-BEB47432628A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7F622459-3B42-4393-A08D-BEB47432628A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{7F622459-3B42-4393-A08D-BEB47432628A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{691D70EC-2488-4E24-85B4-418AB1728010}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{691D70EC-2488-4E24-85B4-418AB1728010}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{691D70EC-2488-4E24-85B4-418AB1728010}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{691D70EC-2488-4E24-85B4-418AB1728010}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -51,6 +59,7 @@ Global
 		{CB3A9BEA-C247-4FEB-8670-98E3034FC214} = {A50202E7-0386-4EB3-B09C-00EFCAE360F7}
 		{40608F32-BF6E-4DE4-85AE-EF71C69EF18D} = {17C4E0DE-B863-4A81-B755-62E663D041F1}
 		{7F622459-3B42-4393-A08D-BEB47432628A} = {A50202E7-0386-4EB3-B09C-00EFCAE360F7}
+		{691D70EC-2488-4E24-85B4-418AB1728010} = {231EF7BF-5CF0-45D3-BB24-8FF5E1381EDC}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {D55424FE-E903-489F-8709-BC2A5802AB45}

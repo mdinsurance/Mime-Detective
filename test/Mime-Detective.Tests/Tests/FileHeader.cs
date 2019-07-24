@@ -80,7 +80,7 @@ namespace MimeDetective.Tests
         {
             var allTypeValues = GetAllTypeValues();
             var zipFileTypesFilteredOut = allTypeValues
-                                        .Except(MsOfficeAnalyzer.MsDocTypes)
+                                        .Except(MicrosoftCompoundDocumentFileAnalyzer.CompoundDocumentTypes)
                                         .Except(MimeTypes.XmlTypes)
                                         .Except(PlainTextAnalyzer.PlainTextTypes)
                                         .Except(new[] { MimeTypes.UNKNOWN })

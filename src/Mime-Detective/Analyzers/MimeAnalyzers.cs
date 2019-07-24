@@ -36,7 +36,7 @@ namespace MimeDetective
         static MimeAnalyzers()
         {
             SecondaryAnalyzers.Add(MimeTypes.ZIP, new ZipFileAnalyzer());
-            SecondaryAnalyzers.Add(MimeTypes.MS_OFFICE, new MsOfficeAnalyzer());
+            SecondaryAnalyzers.Add(MimeTypes.MS_OFFICE, new MicrosoftCompoundDocumentFileAnalyzer());
             SecondaryAnalyzers.Add(MimeTypes.UNKNOWN, new PlainTextAnalyzer());
         }
 

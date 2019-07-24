@@ -8,23 +8,6 @@ namespace MimeDetective.Tests.Documents
     {
         public const string DocsPath = "./Data/Documents/";
 
-        //examples of doc which don't match specific sub header but match ms doc header
-        [Theory]
-        [InlineData("OpenOfficePpt.ppt")]
-        [InlineData("OpenOfficeWord6.0Doc.doc")]
-        [InlineData("OpenOfficeWord95Doc.doc")]
-        [InlineData("OpenOfficeWordDoc.doc")]
-        [InlineData("OpenOfficeExcel.xls")]
-        [InlineData("OpenOfficeExcel50.xls")]
-        [InlineData("OpenOfficeExcel95.xls")]
-        [InlineData("XlsExcel2007.xls")]
-        public async Task IsMSOLEDocType(string fileName)
-        {
-            var info = GetFileInfo(DocsPath, fileName);
-
-            await AssertIsType(info, MimeTypes.MS_OFFICE);
-        }
-
         [Theory]
         [InlineData("DocWord2016.doc")]
         [InlineData("DocWord97.doc")]

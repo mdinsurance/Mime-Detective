@@ -26,7 +26,7 @@ namespace MimeDetective.Tests.Analyzers
             Assert.NotNull(MimeAnalyzers.SecondaryAnalyzers);
             Assert.NotEmpty(MimeAnalyzers.SecondaryAnalyzers);
             Assert.IsType<ZipFileAnalyzer>(MimeAnalyzers.SecondaryAnalyzers[MimeTypes.ZIP]);
-            Assert.IsType<MsOfficeAnalyzer>(MimeAnalyzers.SecondaryAnalyzers[MimeTypes.MS_OFFICE]);
+            Assert.IsType<MicrosoftCompoundDocumentFileAnalyzer>(MimeAnalyzers.SecondaryAnalyzers[MimeTypes.MS_OFFICE]);
         }
     }
 }
