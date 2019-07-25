@@ -40,38 +40,41 @@ namespace MimeDetective.Analyzers
                 mStream.Seek(0, SeekOrigin.Begin);
             }
 
+
+            FileType result = null;
+            using (var cf = new CompoundFile(mStream, CFSUpdateMode.ReadOnly, CFSConfiguration.NoValidationException | CFSConfiguration.LeaveOpen))
+            {
+
+                if (!(cf.RootStorage.TryGetStream("WordDocument") is null))
+                {
+                    result = MimeTypes.WORD;
+                }
+                else if (!(cf.RootStorage.TryGetStream("Workbook") is null))
+                {
+                    result = MimeTypes.EXCEL;
+                }
+                else if (!(cf.RootStorage.TryGetStream("Book") is null))
+                {
+                    result = MimeTypes.EXCEL;
+                }
+                else if (!(cf.RootStorage.TryGetStream("Powerpoint Document") is null))
+                {
+                    result = MimeTypes.PPT;
+                }
+                else if (!(cf.RootStorage.TryGetStream("__properties_version1.0") is null))
+                {
+                    result = MimeTypes.MSG;
+                }
+            }
+
             if (locallyCreatedStream)
             {
                 mStream.Dispose();
             }
 
-            using (var cf = new CompoundFile(mStream, CFSUpdateMode.ReadOnly, CFSConfiguration.NoValidationException))
+            if (!(result is null))
             {
-
-                if (!(cf.RootStorage.TryGetStream("WordDocument") is null))
-                {
-                    return MimeTypes.WORD;
-                }
-
-                if (!(cf.RootStorage.TryGetStream("Workbook") is null))
-                {
-                    return MimeTypes.EXCEL;
-                }
-
-                if (!(cf.RootStorage.TryGetStream("Book") is null))
-                {
-                    return MimeTypes.EXCEL;
-                }
-
-                if (!(cf.RootStorage.TryGetStream("Powerpoint Document") is null))
-                {
-                    return MimeTypes.PPT;
-                }
-
-                if (!(cf.RootStorage.TryGetStream("__properties_version1.0") is null))
-                {
-                    return MimeTypes.MSG;
-                }
+                return result;
             }
 
             if (string.IsNullOrWhiteSpace(mimeHint) == false)

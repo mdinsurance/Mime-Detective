@@ -1,5 +1,7 @@
 ﻿using MimeDetective.Analyzers;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 using Xunit;
 
@@ -7,41 +9,161 @@ namespace MimeDetective.Tests.Analyzers
 {
     public class PlainTextAnalyzerTests
     {
+        private readonly PlainTextAnalyzer analyzer;
+
+        public PlainTextAnalyzerTests()
+        {
+            this.analyzer = new PlainTextAnalyzer();
+        }
+
         [Fact]
         public void DefaultConstructor()
         {
-            var analyzer = new PlainTextAnalyzer();
-
-            //assertion here just to have
-            Assert.NotNull(analyzer);
+            Assert.NotNull(this.analyzer);
         }
 
+        public static IEnumerable<(string path, string extension, string mimeType)> DetectableFiles => new List<(string path, string extension, string mimeType)>
+        {
+            ("./Data/Text/test.csv", "csv", "text/csv"),
+        };
+
+        public static IEnumerable<(string path, string extension, string mimeType)> NonDetectableFiles => new List<(string path, string extension, string mimeType)>
+        {
+            ("./Data/Text/htmlFile.html", "txt", "text/plain"),
+            ("./Data/Text/test.txt", "txt", "text/plain"),
+            ("./Data/Text/TextFile1.txt", "txt", "text/plain"),
+            ("./Data/Text/threeCharFile.txt", "txt", "text/plain"),
+            ("./Data/Text/twoCharFile.txt", "txt", "text/plain"),
+        };
+
+        public static IEnumerable<object[]> DetectableFilesWithExtensionsAndMimeType => DetectableFiles.Select(x => new object[] { x.path, x.extension, x.mimeType }).ToList();
+
+        public static IEnumerable<object[]> AllFilesWithExtensionsAndMimeType => DetectableFiles.Union(NonDetectableFiles).Select(x => new object[] { x.path, x.extension, x.mimeType }).ToList();
+
+        public static IEnumerable<object[]> AllFilesPathsOnly => DetectableFiles.Union(NonDetectableFiles).Select(x => new object[] { x.path }).ToList();
 
         [Theory]
-        [InlineData("./Data/Text/test.csv", null, null, "csv", "text/csv")]
-        [InlineData("./Data/Text/test.csv", "ignored", "ignored", "csv", "text/csv")]
-        [InlineData("./Data/Text/test.txt", null, null, "txt", "text/plain")]
-        [InlineData("./Data/Text/test.txt", "mnint", null, "txt", "mnint")]
-        [InlineData("./Data/Text/test.txt", null, "exthint", "exthint", "text/plain")]
-        [InlineData("./Data/Text/test.txt", "mnint", "exthint", "exthint", "mnint")]
-        [InlineData("./Data/Text/my-custom-text-format.cust", null, null, "txt", "text/plain")]
-        [InlineData("./Data/Text/my-custom-text-format.cust", "mnint", null, "txt", "mnint")]
-        [InlineData("./Data/Text/my-custom-text-format.cust", null, "exthint", "exthint", "text/plain")]
-        [InlineData("./Data/Text/my-custom-text-format.cust", "mnint", "exthint", "exthint", "mnint")]
-        public async Task Search(string path, string mimeHint, string extensionHint, string expectedExtension, string expectedMime)
+        [MemberData(nameof(AllFilesWithExtensionsAndMimeType))]
+        public async Task Search_Returns_Correct_Extension_And_MimeType(string path, string expectedExtension, string expectedMimeType)
         {
-            var analyzer = new PlainTextAnalyzer();
             var file = new FileInfo(path);
             FileType type = null;
 
             using (var result = await ReadResult.ReadFileHeaderAsync(file))
             {
-                type = analyzer.Search(in result, mimeHint, extensionHint);
+                type = this.analyzer.Search(in result);
             }
 
             Assert.NotNull(type);
             Assert.Equal(expectedExtension, type.Extension);
-            Assert.Equal(expectedMime, type.Mime);
+            Assert.Equal(expectedMimeType, type.Mime);
+        }
+
+        [Theory]
+        [MemberData(nameof(DetectableFilesWithExtensionsAndMimeType))]
+        public async Task Search_Returns_FileType_And_Ignores_Hints_For_Detectable_FilesTypes(string path, string expectedExtension, string expectedMimeType)
+        {
+            var file = new FileInfo(path);
+            FileType type = null;
+
+            using (var result = await ReadResult.ReadFileHeaderAsync(file))
+            {
+                type = this.analyzer.Search(in result, "ignored", "ignored");
+            }
+
+            Assert.NotNull(type);
+            Assert.Equal(expectedExtension, type.Extension);
+            Assert.Equal(expectedMimeType, type.Mime);
+        }
+
+        [Fact]
+        public async Task Search_Returns_Hinted_MimeType_When_Unknown_Type()
+        {
+            var file = new FileInfo("./Data/Text/my-custom-text-format.cust");
+            FileType type = null;
+
+            using (var result = await ReadResult.ReadFileHeaderAsync(file))
+            {
+                type = this.analyzer.Search(in result, "hint", null);
+            }
+
+            Assert.NotNull(type);
+            Assert.Equal("txt", type.Extension);
+            Assert.Equal("hint", type.Mime);
+        }
+
+        [Fact]
+        public async Task Search_Returns_Hinted_Extension_When_Unknown_Type()
+        {
+            var analyzer = new ZipFileAnalyzer();
+            var file = new FileInfo("./Data/Text/my-custom-text-format.cust");
+            FileType type = null;
+
+            using (var result = await ReadResult.ReadFileHeaderAsync(file))
+            {
+                type = this.analyzer.Search(in result, null, "hint");
+            }
+
+            Assert.NotNull(type);
+            Assert.Equal("hint", type.Extension);
+            Assert.Equal("text/plain", type.Mime);
+        }
+
+        [Fact]
+        public async Task Search_Returns_Basic_Text_Details_When_Unknown_Type()
+        {
+            var analyzer = new ZipFileAnalyzer();
+            var file = new FileInfo("./Data/Text/my-custom-text-format.cust");
+            FileType type = null;
+
+            using (var result = await ReadResult.ReadFileHeaderAsync(file))
+            {
+                type = this.analyzer.Search(in result);
+            }
+
+            Assert.NotNull(type);
+            Assert.Equal("txt", type.Extension);
+            Assert.Equal("text/plain", type.Mime);
+        }
+
+        [Theory]
+        [MemberData(nameof(AllFilesPathsOnly))]
+        public async Task Analyzer_Does_Not_Dipose_Stream_When_ShouldDisposeStream_True(string path)
+        {
+            using (var s = File.OpenRead(path))
+            {
+                using (var testStream = new TestStream(s))
+                {
+                    using (var readResult = await ReadResult.ReadHeaderFromStreamAsync(testStream, shouldDisposeStream: true, shouldResetStreamPosition: true))
+                    {
+                        this.analyzer.Search(in readResult);
+
+                        Assert.False(testStream.HasBeenDisposed);
+                    }
+
+                    Assert.True(testStream.HasBeenDisposed);
+                }
+            }
+        }
+
+        [Theory]
+        [MemberData(nameof(AllFilesPathsOnly))]
+        public async Task Analyzer_Does_Not_Dipose_Stream_When_ShouldDisposeStream_False(string path)
+        {
+            using (var s = File.OpenRead(path))
+            {
+                using (var testStream = new TestStream(s))
+                {
+                    using (var readResult = await ReadResult.ReadHeaderFromStreamAsync(testStream, shouldDisposeStream: false, shouldResetStreamPosition: true))
+                    {
+                        this.analyzer.Search(in readResult);
+
+                        Assert.False(testStream.HasBeenDisposed);
+                    }
+
+                    Assert.False(testStream.HasBeenDisposed);
+                }
+            }
         }
     }
 }

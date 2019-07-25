@@ -20,7 +20,7 @@ namespace MimeDetective.Analyzers
         public FileType Search(in ReadResult readResult, string mimeHint = null, string extensionHint = null)
         {
             var locallyCreatedStream = false;
-            Stream mStream = null;
+            Stream mStream;
 
             if (readResult.Source is null)
             {
@@ -38,6 +38,7 @@ namespace MimeDetective.Analyzers
                 mStream.Seek(0, SeekOrigin.Begin);
             }
 
+            FileType result = null;
             using (var zipData = new ZipArchive(mStream, ZipArchiveMode.Read, leaveOpen: true))
             {
                 //check for office xml formats
@@ -45,21 +46,28 @@ namespace MimeDetective.Analyzers
 
                 if (officeXml != null)
                 {
-                    return officeXml;
+                    result = officeXml;
                 }
-
-                //check for open office formats
-                var openOffice = this.CheckForOpenDocument(zipData);
-
-                if (openOffice != null)
+                else
                 {
-                    return openOffice;
+                    //check for open office formats
+                    var openOffice = this.CheckForOpenDocument(zipData);
+
+                    if (openOffice != null)
+                    {
+                        result = openOffice;
+                    }
                 }
             }
 
             if (locallyCreatedStream)
             {
                 mStream.Dispose();
+            }
+
+            if (!(result is null))
+            {
+                return result;
             }
 
             if (!(mimeHint is null) || !(extensionHint is null))
