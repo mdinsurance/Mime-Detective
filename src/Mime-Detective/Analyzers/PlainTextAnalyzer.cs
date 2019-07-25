@@ -9,22 +9,32 @@ namespace MimeDetective.Analyzers
     {
         public FileType Key { get; } = MimeTypes.UNKNOWN;
 
-        public static FileType[] PlainTextTypes { get; } = new FileType[] { MimeTypes.TXT, MimeTypes.CSV, MimeTypes.HTML };
+        public static FileType[] PlainTextTypes { get; } = new FileType[] { MimeTypes.TXT, MimeTypes.CSV, MimeTypes.HTML, MimeTypes.XML, MimeTypes.EML };
 
         public FileType Search(in ReadResult readResult, string mimeHint = null, string extensionHint = null)
         {
             using (var stream = readResult.GetStream())
             {
-                var lines = this.GetLines(stream, 5);
+                var lines = this.GetLines(stream, 20);
 
                 if (DetectHtml(lines))
                 {
                     return MimeTypes.HTML;
                 }
 
+                if (DetectXml(lines))
+                {
+                    return MimeTypes.XML;
+                }
+
                 if (DetectCsv(lines))
                 {
                     return MimeTypes.CSV;
+                }
+
+                if (DetectEml(lines))
+                {
+                    return MimeTypes.EML;
                 }
 
                 if (!(mimeHint is null) || !(extensionHint is null))
@@ -34,6 +44,74 @@ namespace MimeDetective.Analyzers
 
                 return MimeTypes.TXT;
             }
+        }
+
+        private bool DetectXml(IEnumerable<string> lines)
+        {
+            var firstLine = lines.FirstOrDefault()?.TrimStart();
+
+            if (firstLine is null)
+            {
+                return false;
+            }
+
+            return firstLine.StartsWith("<?xml", StringComparison.OrdinalIgnoreCase);
+        }
+
+        private bool DetectEml(IEnumerable<string> lines)
+        {
+            var firstLine = lines.FirstOrDefault()?.TrimStart();
+
+            if (firstLine is null)
+            {
+                return false;
+            }
+
+            return lines.Any(l => l.StartsWith("From:", StringComparison.OrdinalIgnoreCase))
+                        && lines.Any(l => l.StartsWith("Date:", StringComparison.OrdinalIgnoreCase));
+        }
+
+        private bool DetectHtml(IEnumerable<string> lines)
+        {
+            var firstLine = lines.FirstOrDefault()?.TrimStart();
+
+            if (firstLine is null)
+            {
+                return false;
+            }
+
+            return firstLine.StartsWith("<html", StringComparison.OrdinalIgnoreCase)
+                    || firstLine.StartsWith("<!DOCTYPE html", StringComparison.OrdinalIgnoreCase);
+        }
+
+        private static bool DetectCsv(IEnumerable<string> lines)
+        {
+            if (lines.Count() < 2)
+            {
+                return false;
+            }
+
+            //TODO: check for commas within quotes
+
+            var commaCount = -1;
+            foreach (var l in lines)
+            {
+                var newCount = l.Count(x => char.Equals(x, ','));
+                if (newCount == 0)
+                {
+                    return false;
+                }
+                if (commaCount == -1)
+                {
+                    commaCount = newCount;
+                }
+                else if (commaCount != newCount)
+                {
+                    return false;
+                }
+            }
+
+            return true;
         }
 
         private IEnumerable<string> GetLines(Stream stream, int lines, bool skipBlankHeader = true)
@@ -81,49 +159,6 @@ namespace MimeDetective.Analyzers
                     }
                 }
             }
-        }
-
-        private bool DetectHtml(IEnumerable<string> lines)
-        {
-            var firstLine = lines.FirstOrDefault()?.TrimStart();
-
-            if (firstLine is null)
-            {
-                return false;
-            }
-
-            return firstLine.StartsWith("<html", StringComparison.OrdinalIgnoreCase)
-                    || firstLine.StartsWith("<!DOCTYPE html", StringComparison.OrdinalIgnoreCase);
-        }
-
-        private static bool DetectCsv(IEnumerable<string> lines)
-        {
-            if (lines.Count() < 2)
-            {
-                return false;
-            }
-
-            //TODO: check for commas within quotes
-
-            var commaCount = -1;
-            foreach (var l in lines)
-            {
-                var newCount = l.Count(x => char.Equals(x, ','));
-                if (newCount == 0)
-                {
-                    return false;
-                }
-                if (commaCount == -1)
-                {
-                    commaCount = newCount;
-                }
-                else if (commaCount != newCount)
-                {
-                    return false;
-                }
-            }
-
-            return true;
         }
     }
 }

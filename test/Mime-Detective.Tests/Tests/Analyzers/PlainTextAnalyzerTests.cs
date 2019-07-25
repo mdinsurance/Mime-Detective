@@ -28,6 +28,8 @@ namespace MimeDetective.Tests.Analyzers
             ("./Data/Text/htmlFile.html", "html", "text/html"),
             ("./Data/Text/htmlFileNoDocType.html", "html", "text/html"),
             ("./Data/Text/html4FileWithDocType.html", "html", "text/html"),
+            ("./Data/Text/test.eml", "eml", "message/rfc822"),
+            ("./Data/Text/test.xml", "xml", "text/xml"),
         };
 
         public static IEnumerable<(string path, string extension, string mimeType)> NonDetectableFiles => new List<(string path, string extension, string mimeType)>

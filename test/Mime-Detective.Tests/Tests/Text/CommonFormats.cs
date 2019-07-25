@@ -17,7 +17,8 @@ namespace MimeDetective.Tests.Text
 
             var fileType = await info.GetFileTypeAsync();
 
-            Assert.Equal(fileType.Extension, MimeTypes.TXT.Extension);
+            Assert.Equal(MimeTypes.TXT.Extension, fileType.Extension);
+            Assert.Equal(MimeTypes.TXT.Mime, fileType.Mime);
         }
 
         [Fact]
@@ -28,7 +29,18 @@ namespace MimeDetective.Tests.Text
             var fileType = await info.GetFileTypeAsync();
 
             Assert.Equal(MimeTypes.HTML.Extension, fileType.Extension);
-            Assert.Equal("text/html", fileType.Mime);
+            Assert.Equal(MimeTypes.HTML.Mime, fileType.Mime);
+        }
+
+        [Fact]
+        public async Task IsEml()
+        {
+            var info = new FileInfo(TextPath + "test.eml");
+
+            var fileType = await info.GetFileTypeAsync();
+
+            Assert.Equal(MimeTypes.EML.Extension, fileType.Extension);
+            Assert.Equal(MimeTypes.EML.Mime, fileType.Mime);
         }
 
         [Fact]
@@ -39,7 +51,7 @@ namespace MimeDetective.Tests.Text
             var fileType = await info.GetFileTypeAsync();
 
             Assert.Equal(MimeTypes.CSV.Extension, fileType.Extension);
-            Assert.Equal("text/csv", fileType.Mime);
+            Assert.Equal(MimeTypes.CSV.Mime, fileType.Mime);
         }
 
         [Fact]
@@ -52,7 +64,7 @@ namespace MimeDetective.Tests.Text
             var fileType = await info.GetFileTypeAsync();
 
             Assert.Equal(MimeTypes.XML.Extension, fileType.Extension);
-            Assert.Equal("application/xml", fileType.Mime);
+            Assert.Equal(MimeTypes.XML.Mime, fileType.Mime);
         }
 
         [Fact]
@@ -65,7 +77,7 @@ namespace MimeDetective.Tests.Text
             var fileType = await info.GetFileTypeAsync();
 
             Assert.Equal(MimeTypes.XML.Extension, fileType.Extension);
-            Assert.Equal("application/xml", fileType.Mime);
+            Assert.Equal(MimeTypes.XML.Mime, fileType.Mime);
         }
 
         [Fact]
@@ -78,7 +90,7 @@ namespace MimeDetective.Tests.Text
             var fileType = await info.GetFileTypeAsync();
 
             Assert.Equal(MimeTypes.XML.Extension, fileType.Extension);
-            Assert.Equal("application/xml", fileType.Mime);
+            Assert.Equal(MimeTypes.XML.Mime, fileType.Mime);
         }
 
         [Fact]
@@ -91,7 +103,7 @@ namespace MimeDetective.Tests.Text
             var fileType = await info.GetFileTypeAsync();
 
             Assert.Equal(MimeTypes.XML.Extension, fileType.Extension);
-            Assert.Equal("application/xml", fileType.Mime);
+            Assert.Equal(MimeTypes.XML.Mime, fileType.Mime);
         }
     }
 }

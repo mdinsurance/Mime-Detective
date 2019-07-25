@@ -1,0 +1,9 @@
+MIME-Version: 1.0
+From: a@b.com
+To: z@y.com
+Date: 25 Jul 2019 16:29:54 +0100
+Subject: this is a subject
+Content-Type: text/html; charset=us-ascii
+Content-Transfer-Encoding: quoted-printable
+
+This is a test

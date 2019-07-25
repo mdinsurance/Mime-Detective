@@ -18,12 +18,12 @@ namespace MimeDetective
 
         #region Constants
 
-        #region office, excel, ppt and documents, xml, pdf, rtf, msdoc
-
         /// <summary>
         /// This is for usage when a file type definition requires content inspection instead of reading headers
         /// </summary>
         public static readonly byte?[] EmptyHeader = new byte?[0];
+
+        #region office, excel, ppt and documents, xml, pdf, rtf, msdoc
 
         // office and documents
         public static readonly FileType WORD = new FileType(new byte?[] { 0xEC, 0xA5, 0xC1, 0x00 }, "doc", "application/msword", 512);
@@ -60,30 +60,28 @@ namespace MimeDetective
         //todo place holder extension
         public static readonly FileType MS_OFFICE = new FileType(new byte?[] { 0xD0, 0xCF, 0x11, 0xE0, 0xA1, 0xB1, 0x1A, 0xE1 }, "doc,ppt,xls,msg", "application/octet-stream");
 
-        //application/xml text/xml
-        //                                                               r     s     i     o     n     =     "     1     .     0     "     ?     >
-        public static readonly FileType XML = new FileType(new byte?[] { 0x72, 0x73, 0x69, 0x6F, 0x6E, 0x3D, 0x22, 0x31, 0x2E, 0x30, 0x22, 0x3F, 0x3E }, "xml", "text/xml");
+      
+        #endregion office, excel, ppt and documents, xml, pdf, rtf, msdoc
 
-        // XML file encoded with UTF-8                                    <     ?     x     m     l     (spc)
-        public static readonly FileType XML_NoBom = new FileType(new byte?[] { 0x3C, 0x3F, 0x78, 0x6D, 0x6C, 0x20, }, "xml", "application/xml");
-        // XML file encoded with UTF-8 + Byte order mark                         Byte Order Mark    <     ?     x     m     l     (spc)
-        public static readonly FileType XML_Utf8Bom = new FileType(new byte?[] { 0x0EF, 0xBB, 0xBF, 0x3C, 0x3F, 0x78, 0x6D, 0x6C, 0x20, }, "xml", "application/xml");
-        // XML file encoded with UCS-2 Big Endian                               BOM FEFF     <           ?           x           m           l           (spc)
-        public static readonly FileType XML_UCS2BE = new FileType(new byte?[] { 0x0FF, 0xFE, 0x3C, 0x00, 0x3F, 0x00, 0x78, 0x00, 0x6D, 0x00, 0x6C, 0x00, 0x20, 0x00, }, "xml", "application/xml");
-        // XML file encoded with UCS-2 Little Endian                            BOM FFFE     <           ?           x           m           l           (spc)
-        public static readonly FileType XML_UCS2LE = new FileType(new byte?[] { 0x0FE, 0xFF, 0x00, 0x3C, 0x00, 0x3F, 0x00, 0x78, 0x00, 0x6D, 0x00, 0x6C, 0x00, 0x20, }, "xml", "application/xml");
-
-        //text/html
+        #region Plain text
         public static readonly FileType HTML = new FileType(EmptyHeader, "html", "text/html");
 
-        //text files
+        /*
+        * 46 72 6F 6D 20 20 20 or	 	From
+       46 72 6F 6D 20 3F 3F 3F or	 	From ???
+       46 72 6F 6D 3A 20	 	From:
+       EML	 	A commmon file extension for e-mail files. Signatures shown here
+       are for Netscape, Eudora, and a generic signature, respectively.
+       EML is also used by Outlook Express and QuickMail.
+        */
+        public static readonly FileType EML = new FileType(EmptyHeader, "eml", "message/rfc822");
+
         public static readonly FileType TXT = new FileType(EmptyHeader, "txt", "text/plain");
 
         public static readonly FileType CSV = new FileType(EmptyHeader, "csv", "text/csv");
 
-        #endregion office, excel, ppt and documents, xml, pdf, rtf, msdoc
-
-        // graphics
+        public static readonly FileType XML = new FileType(EmptyHeader, "xml", "text/xml");
+        #endregion
 
         #region Graphics jpeg, png, gif, bmp, ico, tiff
 
@@ -212,28 +210,15 @@ namespace MimeDetective
 
         #endregion Crypto aes, skr, skr_2, pkr
 
-        /*
-         * 46 72 6F 6D 20 20 20 or	 	From
-        46 72 6F 6D 20 3F 3F 3F or	 	From ???
-        46 72 6F 6D 3A 20	 	From:
-        EML	 	A commmon file extension for e-mail files. Signatures shown here
-        are for Netscape, Eudora, and a generic signature, respectively.
-        EML is also used by Outlook Express and QuickMail.
-         */
-        public static readonly FileType EML_FROM = new FileType(new byte?[] { 0x46, 0x72, 0x6F, 0x6D }, "eml", "message/rfc822");
-
         //EVTX	 	Windows Vista event log file
         public static readonly FileType ELF = new FileType(new byte?[] { 0x45, 0x6C, 0x66, 0x46, 0x69, 0x6C, 0x65, 0x00 }, "elf", "text/plain");
 
         public static readonly FileType[] Types = new FileType[] { PDF, JPEG, ZIP, ZIP_EMPTY, RAR, RTF, PNG, GIF, WEBP, DLL_EXE, MS_OFFICE,
-                BMP, DLL_EXE, ZIP_7z, GZ_TGZ, TAR_ZH, TAR_ZV, OGG, ICO, XML, XML_NoBom, XML_Utf8Bom, XML_UCS2BE, XML_UCS2LE, DWG, LIB_COFF, PST, PSD, BZ2,
-                AES, SKR, SKR_2, PKR, EML_FROM, ELF,
+                BMP, DLL_EXE, ZIP_7z, GZ_TGZ, TAR_ZH, TAR_ZV, OGG, ICO, DWG, LIB_COFF, PST, PSD, BZ2,
+                AES, SKR, SKR_2, PKR, ELF,
                 Mp3ID3, Wav, Flac, MIDI,
                 Tiff, TiffLittleEndian, TiffBigEndian, TiffBig,
                 MP4Container, Mp4ISOv1, MovQuickTime, MP4VideoFiles, Mp4QuickTime, Mp4VideoFile, ThreeGPP2File, Mp4A, FLV };
-
-        //public static readonly FileType[] sortedTypes = Types.OrderBy(x => x.Header.Length).ToArray();
-
 
         /// <summary>
         /// OpenDocument And OpenXML Document types
@@ -243,26 +228,6 @@ namespace MimeDetective
         public static readonly FileType UNKNOWN = new FileType(EmptyHeader, "txt,csv", "text/plain");
 
         #endregion Constants
-
-        /*
-        public static void SaveToXmlFile(string path, IEnumerable<FileType> types)
-        {
-            using (FileStream file = File.OpenWrite(path))
-            {
-                var serializer = new System.Xml.Serialization.XmlSerializer(typeof(IEnumerable<FileType>));
-                serializer.Serialize(file, types);
-            }
-        }
-
-        public static FileType[] LoadFromXmlFile(string path)
-        {
-            using (FileStream file = File.OpenRead(path))
-            {
-                var serializer = new System.Xml.Serialization.XmlSerializer(typeof(FileType[]));
-
-                return (FileType[])serializer.Deserialize(file);
-            }
-        }*/
 
         /// <summary>
         /// Gets the list of FileTypes based on list of extensions in Comma-Separated-Values string
