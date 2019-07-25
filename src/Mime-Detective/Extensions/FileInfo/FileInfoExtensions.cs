@@ -18,6 +18,11 @@ namespace MimeDetective
         {
             using (var readResult = ReadResult.ReadFileHeader(file))
             {
+                if (extensionHint is null)
+                {
+                    extensionHint = file.Extension.TrimStart('.');
+                }
+
                 return MimeAnalyzers.GetFileType(in readResult, mimeHint, extensionHint);
             }
         }
@@ -34,6 +39,11 @@ namespace MimeDetective
         {
             using (var readResult = await ReadResult.ReadFileHeaderAsync(file))
             {
+                if (extensionHint is null)
+                {
+                    extensionHint = file.Extension.TrimStart('.');
+                }
+
                 return MimeAnalyzers.GetFileType(in readResult, mimeHint, extensionHint);
             }
         }
