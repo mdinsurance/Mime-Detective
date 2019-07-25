@@ -25,15 +25,18 @@ namespace MimeDetective.Tests.Analyzers
         public static IEnumerable<(string path, string extension, string mimeType)> DetectableFiles => new List<(string path, string extension, string mimeType)>
         {
             ("./Data/Text/test.csv", "csv", "text/csv"),
+            ("./Data/Text/htmlFile.html", "html", "text/html"),
+            ("./Data/Text/htmlFileNoDocType.html", "html", "text/html"),
+            ("./Data/Text/html4FileWithDocType.html", "html", "text/html"),
         };
 
         public static IEnumerable<(string path, string extension, string mimeType)> NonDetectableFiles => new List<(string path, string extension, string mimeType)>
         {
-            ("./Data/Text/htmlFile.html", "txt", "text/plain"),
             ("./Data/Text/test.txt", "txt", "text/plain"),
             ("./Data/Text/TextFile1.txt", "txt", "text/plain"),
             ("./Data/Text/threeCharFile.txt", "txt", "text/plain"),
             ("./Data/Text/twoCharFile.txt", "txt", "text/plain"),
+            ("./Data/Text/htmlFragment.html", "txt", "text/plain"),
         };
 
         public static IEnumerable<object[]> DetectableFilesWithExtensionsAndMimeType => DetectableFiles.Select(x => new object[] { x.path, x.extension, x.mimeType }).ToList();

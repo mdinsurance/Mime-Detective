@@ -1,4 +1,6 @@
-﻿using System.IO;
+﻿using System;
+using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 
 namespace MimeDetective.Analyzers
@@ -7,76 +9,24 @@ namespace MimeDetective.Analyzers
     {
         public FileType Key { get; } = MimeTypes.UNKNOWN;
 
-        public static FileType[] PlainTextTypes { get; } = new FileType[] { MimeTypes.TXT, MimeTypes.CSV };
+        public static FileType[] PlainTextTypes { get; } = new FileType[] { MimeTypes.TXT, MimeTypes.CSV, MimeTypes.HTML };
 
         public FileType Search(in ReadResult readResult, string mimeHint = null, string extensionHint = null)
         {
-            var locallyCreatedStream = false;
-            Stream mStream = null;
+            using (var stream = readResult.GetStream())
+            {
+                var lines = this.GetLines(stream, 5);
 
-            if (readResult.Source is null)
-            {
-                //this should be the length of the array passed via ReadResult
-                mStream = new MemoryStream(readResult.Array, 0, readResult.Array.Length);
-                locallyCreatedStream = true;
-            }
-            else
-            {
-                mStream = readResult.Source;
-            }
-
-            if (mStream.CanSeek && mStream.Position > 0)
-            {
-                mStream.Seek(0, SeekOrigin.Begin);
-            }
-
-            var isNotCsv = false;
-            using (var streamCopy = new MemoryStream())
-            {
-                mStream.CopyTo(streamCopy);
-                mStream.Seek(0, SeekOrigin.Begin);
-                streamCopy.Seek(0, SeekOrigin.Begin);
-                using (var reader = new StreamReader(streamCopy, System.Text.Encoding.UTF8))
+                if (DetectHtml(lines))
                 {
-                    var commaCount = 0;
-                    var line = reader.ReadLine();
-                    if (string.IsNullOrWhiteSpace(line))
-                    {
-                        isNotCsv = true;
-                    }
-
-                    if (isNotCsv == false)
-                    {
-                        do
-                        {
-                            var count = line.Count(x => char.Equals(x, ','));
-                            if (count == 0)
-                            {
-                                isNotCsv = true;
-                                break;
-                            }
-                            if (commaCount == 0)
-                            {
-                                commaCount = count;
-                            }
-                            if (commaCount != count)
-                            {
-                                isNotCsv = true;
-                                break;
-                            }
-                            line = reader.ReadLine();
-                        } while (string.IsNullOrWhiteSpace(line) == false && isNotCsv == false);
-                    }
+                    return MimeTypes.HTML;
                 }
-            }
 
-            if (locallyCreatedStream)
-            {
-                mStream.Dispose();
-            }
+                if (DetectCsv(lines))
+                {
+                    return MimeTypes.CSV;
+                }
 
-            if (isNotCsv)
-            {
                 if (!(mimeHint is null) || !(extensionHint is null))
                 {
                     return new FileType(MimeTypes.TXT.Header, extensionHint ?? MimeTypes.TXT.Extension, mimeHint ?? MimeTypes.TXT.Mime, MimeTypes.TXT.HeaderOffset);
@@ -84,8 +34,96 @@ namespace MimeDetective.Analyzers
 
                 return MimeTypes.TXT;
             }
+        }
 
-            return MimeTypes.CSV;
+        private IEnumerable<string> GetLines(Stream stream, int lines, bool skipBlankHeader = true)
+        {
+            return InnerGetLines(stream, lines, skipBlankHeader).ToList();
+
+            IEnumerable<string> InnerGetLines(Stream internalStream, int internalLines, bool internalSkipBlankHeader)
+            {
+                internalStream.Position = 0;
+                using (var reader = new StreamReader(internalStream, System.Text.Encoding.UTF8, true, 1024, true))
+                {
+                    var line = reader.ReadLine();
+                    if (!(line is null))
+                    {
+                        if (internalSkipBlankHeader)
+                        {
+                            while (string.IsNullOrWhiteSpace(line) && !(line is null))
+                            {
+                                line = reader.ReadLine();
+                            }
+
+                            if (string.IsNullOrWhiteSpace(line) == false)
+                            {
+                                yield return line;
+                            }
+                        }
+                        else
+                        {
+                            if (!(line is null))
+                            {
+                                yield return line;
+                            }
+                        }
+
+                        for (int i = 1; i < internalLines; i++)
+                        {
+                            line = reader.ReadLine();
+                            if (line is null)
+                            {
+                                break;
+                            }
+
+                            yield return line;
+                        }
+                    }
+                }
+            }
+        }
+
+        private bool DetectHtml(IEnumerable<string> lines)
+        {
+            var firstLine = lines.FirstOrDefault()?.TrimStart();
+
+            if (firstLine is null)
+            {
+                return false;
+            }
+
+            return firstLine.StartsWith("<html", StringComparison.OrdinalIgnoreCase)
+                    || firstLine.StartsWith("<!DOCTYPE html", StringComparison.OrdinalIgnoreCase);
+        }
+
+        private static bool DetectCsv(IEnumerable<string> lines)
+        {
+            if (lines.Count() < 2)
+            {
+                return false;
+            }
+
+            //TODO: check for commas within quotes
+
+            var commaCount = -1;
+            foreach (var l in lines)
+            {
+                var newCount = l.Count(x => char.Equals(x, ','));
+                if (newCount == 0)
+                {
+                    return false;
+                }
+                if (commaCount == -1)
+                {
+                    commaCount = newCount;
+                }
+                else if (commaCount != newCount)
+                {
+                    return false;
+                }
+            }
+
+            return true;
         }
     }
 }

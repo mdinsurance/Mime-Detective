@@ -275,31 +275,6 @@ namespace MimeDetective.Tests
             Assert.Null(almostZerodResult);
         }
 
-        [Theory]
-        [InlineData(smallTxtFile)]
-        [InlineData(oneByteFile, Skip = "Planned in text detector for 1.0.0")]
-        [InlineData(twoByteFile, Skip = "Planned in text detector for 1.0.0")]
-        [InlineData(threeByteFile, Skip = "Planned in text detector for 1.0.0")]
-        public async Task FromSmallTxtFile(string file)
-        {
-            var smallTxt = new FileInfo(file);
-
-            using (var stream = smallTxt.OpenRead())
-            {
-                var bytes = new byte[smallTxt.Length];
-
-                await stream.ReadAsync(bytes, 0, bytes.Length);
-
-                stream.Seek(0, SeekOrigin.Begin);
-
-                var result = await smallTxt.GetFileTypeAsync();
-
-                Assert.Equal(MimeTypes.TXT_UTF8, result);
-                Assert.Equal(MimeTypes.TXT_UTF8, await stream.GetFileTypeAsync());
-                Assert.Equal(MimeTypes.TXT_UTF8, bytes.GetFileType());
-            }
-        }
-
         [Fact]
         public void StreamIsNotDisposedAfterReadingZipFileType()
         {

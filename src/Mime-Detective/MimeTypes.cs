@@ -74,20 +74,10 @@ namespace MimeDetective
         public static readonly FileType XML_UCS2LE = new FileType(new byte?[] { 0x0FE, 0xFF, 0x00, 0x3C, 0x00, 0x3F, 0x00, 0x78, 0x00, 0x6D, 0x00, 0x6C, 0x00, 0x20, }, "xml", "application/xml");
 
         //text/html
-        //                                                                 <      !     D    O     C     T      Y    P     E    (spc)   h    t     m      l     
-        public static readonly FileType HTML = new FileType(new byte?[] { 0x3C, 0x21, 0x44, 0x4F, 0x43, 0x54, 0x59, 0x50, 0x45, 0x20, 0x68, 0x74, 0x6D, 0x6c }, "html", "text/html");
-
-        // HTMl file encoded wuth UTF-8 + Byte order mark                         Byte Order Mark      <     !     D    O     C     T      Y    P     E    (spc)   h    t     m      l
-        public static readonly FileType HTML_Utf8Bom = new FileType(new byte?[] { 0x0EF, 0xBB, 0xBF, 0x3C, 0x21, 0x44, 0x4F, 0x43, 0x54, 0x59, 0x50, 0x45, 0x20, 0x68, 0x74, 0x6D, 0x6c }, "html", "text/html");
+        public static readonly FileType HTML = new FileType(EmptyHeader, "html", "text/html");
 
         //text files
         public static readonly FileType TXT = new FileType(EmptyHeader, "txt", "text/plain");
-
-        public static readonly FileType TXT_UTF8 = new FileType(new byte?[] { 0xEF, 0xBB, 0xBF }, "txt", "text/plain");
-        public static readonly FileType TXT_UTF16_BE = new FileType(new byte?[] { 0xFE, 0xFF }, "txt", "text/plain");
-        public static readonly FileType TXT_UTF16_LE = new FileType(new byte?[] { 0xFF, 0xFE }, "txt", "text/plain");
-        public static readonly FileType TXT_UTF32_BE = new FileType(new byte?[] { 0x00, 0x00, 0xFE, 0xFF }, "txt", "text/plain");
-        public static readonly FileType TXT_UTF32_LE = new FileType(new byte?[] { 0xFF, 0xFE, 0x00, 0x00 }, "txt", "text/plain");
 
         public static readonly FileType CSV = new FileType(EmptyHeader, "csv", "text/csv");
 
@@ -237,8 +227,7 @@ namespace MimeDetective
 
         public static readonly FileType[] Types = new FileType[] { PDF, JPEG, ZIP, ZIP_EMPTY, RAR, RTF, PNG, GIF, WEBP, DLL_EXE, MS_OFFICE,
                 BMP, DLL_EXE, ZIP_7z, GZ_TGZ, TAR_ZH, TAR_ZV, OGG, ICO, XML, XML_NoBom, XML_Utf8Bom, XML_UCS2BE, XML_UCS2LE, DWG, LIB_COFF, PST, PSD, BZ2,
-                AES, SKR, SKR_2, PKR, EML_FROM, ELF, TXT_UTF8, TXT_UTF16_BE, TXT_UTF16_LE, TXT_UTF32_BE, TXT_UTF32_LE,
-                HTML, HTML_Utf8Bom,
+                AES, SKR, SKR_2, PKR, EML_FROM, ELF,
                 Mp3ID3, Wav, Flac, MIDI,
                 Tiff, TiffLittleEndian, TiffBigEndian, TiffBig,
                 MP4Container, Mp4ISOv1, MovQuickTime, MP4VideoFiles, Mp4QuickTime, Mp4VideoFile, ThreeGPP2File, Mp4A, FLV };

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Buffers;
 using System.IO;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace MimeDetective
@@ -176,6 +177,31 @@ namespace MimeDetective
             return new ReadResult(header, stream, bytesRead, isArrayRented: true, shouldDisposeStream, shouldResetStreamPosition);
         }
 
+        /// <summary>
+        /// Returns a Stream at position zero that will correctly dispose if necessary.
+        /// </summary>
+        /// <returns></returns>
+        public ReadResultStream GetStream()
+        {
+            ReadResultStream resultStream;
+
+            if (this.Source is null)
+            {
+                resultStream = new ReadResultStream(this.Array);
+            }
+            else
+            {
+                resultStream = new ReadResultStream(this.Source);
+            }
+
+            if (resultStream.CanSeek && resultStream.Position > 0)
+            {
+                resultStream.Seek(0, SeekOrigin.Begin);
+            }
+
+            return resultStream;
+        }
+
         public void Dispose()
         {
             var sourceIsNotNull = !(this.Source is null);
@@ -195,5 +221,72 @@ namespace MimeDetective
                 ArrayPool<byte>.Shared.Return(this.Array);
             }
         }
+    }
+
+    public class ReadResultStream : Stream
+    {
+        readonly bool disposeStream = false;
+        Stream stream;
+
+        public ReadResultStream(Stream s)
+        {
+            stream = s;
+            disposeStream = false;
+        }
+
+        public ReadResultStream(byte[] bytes)
+        {
+            stream = new MemoryStream(bytes);
+            disposeStream = true;
+        }
+
+        public override bool CanRead => stream.CanRead;
+        public override bool CanSeek => stream.CanSeek;
+        public override bool CanWrite => stream.CanWrite;
+        public override long Length => stream.Length;
+        public override long Position { get => stream.Position; set => stream.Position = value; }
+
+        public override void Flush() => stream.Flush();
+        public override int Read(byte[] buffer, int offset, int count) => stream.Read(buffer, offset, count);
+        public override long Seek(long offset, SeekOrigin origin) => stream.Seek(offset, origin);
+        public override void SetLength(long value) => stream.SetLength(value);
+        public override void Write(byte[] buffer, int offset, int count) => stream.Write(buffer, offset, count);
+
+        public override IAsyncResult BeginRead(byte[] buffer, int offset, int count, AsyncCallback callback, object state) => stream.BeginRead(buffer, offset, count, callback, state);
+
+        public override IAsyncResult BeginWrite(byte[] buffer, int offset, int count, AsyncCallback callback, object state) => stream.BeginWrite(buffer, offset, count, callback, state);
+
+        public override bool CanTimeout => stream.CanTimeout;
+
+        public override Task CopyToAsync(Stream destination, int bufferSize, CancellationToken cancellationToken) => stream.CopyToAsync(destination, bufferSize, cancellationToken);
+
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing && this.disposeStream)
+            {
+                this.stream?.Dispose();
+                this.stream = null;
+            }
+        }
+
+        public override int EndRead(IAsyncResult asyncResult) => stream.EndRead(asyncResult);
+
+        public override void EndWrite(IAsyncResult asyncResult) => stream.EndWrite(asyncResult);
+
+        public override Task FlushAsync(CancellationToken cancellationToken) => stream.FlushAsync(cancellationToken);
+
+        public override object InitializeLifetimeService() => stream.InitializeLifetimeService();
+
+        public override Task<int> ReadAsync(byte[] buffer, int offset, int count, CancellationToken cancellationToken) => stream.ReadAsync(buffer, offset, count, cancellationToken);
+
+        public override int ReadByte() => stream.ReadByte();
+
+        public override int ReadTimeout { get => stream.ReadTimeout; set => stream.ReadTimeout = value; }
+
+        public override Task WriteAsync(byte[] buffer, int offset, int count, CancellationToken cancellationToken) => stream.WriteAsync(buffer, offset, count, cancellationToken);
+
+        public override void WriteByte(byte value) => stream.WriteByte(value);
+
+        public override int WriteTimeout { get => stream.WriteTimeout; set => stream.WriteTimeout = value; }
     }
 }
